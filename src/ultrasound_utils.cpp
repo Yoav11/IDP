@@ -1,33 +1,13 @@
 #include <ultrasound_utils.h>
 
-/*
-* Ultrasonic Sensor HC-SR04 and Arduino Tutorial
-*
-* by Dejan Nedelkovski,
-* www.HowToMechatronics.com
-*
-*/
-
-// defines pins numbers
-//const int trigPin = 9;
-//const int echoPin = 10;
-
-
-
+// Set up an ultrasound distance sensor
 void ultrasound_setup(int trigPin, int echoPin) {
   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
 
 }
 
-
-/*
-This function returns the distance from the sensor to an object in cm. To use this function, to the following
------
-delay(1000/20); // delay in mm
-Serial.println(get_distance(trigPin, echoPin));
------
-*/
+// This function returns the distance from the sensor to an object in cm. To use this function, to the following
 int get_distance(int trigPin, int echoPin) {
   // defines variables
   long duration;
