@@ -1,10 +1,20 @@
-#include "Arduino.h"
-#include <ultrasound_utils.h>
+#include <Arduino.h>
+#include <motor_utils.h>
+#include <led_utils.h>
+
+int old_routine_step;
+bool stopped = true;
 
 void setup() {
-  ultrasound_setup(trigPinFront, echoPinFront);
-  Serial.begin(9600); // Starts the serial communication
+    pinMode(LED_BUILTIN, OUTPUT);
+    Serial.begin(9600);
+    motor_begin();
+    delay(3000);
 }
 
 void loop() {
+    stopped = stop_ticker();
+    if(stopped){
+        delay(2000);
+        square_test();
 }
