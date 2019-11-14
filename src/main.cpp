@@ -17,5 +17,4 @@ void loop() {
     if(stopped){
         delay(2000);
         square_test();
-    }
 }
