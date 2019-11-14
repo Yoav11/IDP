@@ -1,41 +1,57 @@
 #include <navigation_utils.h>
 #include <ultrasound_utils.h>
+#include <motor_utils.h>
 
 // Upon calling this function once, the robot moves forward till a desired distance is achieved.
 void move_forward_till(float desired_d, float speed) {
-
-  while (abs(get_distance(trigPinFront, echoPinFront) - desired_d) > 5) {
-    const int direction = (get_distance(trigPinFront, echoPinFront) - desired_d) / abs(get_distance(trigPinFront, echoPinFront) - desired_d); // This is either +1 or -1 indicating the direction of travel.
-    for (int i=0; i<2; i++) {
-      motor_run(i, direction * speed);
-    }
-  }
-
-  while (abs(get_distance(trigPinFront, echoPinFront) - desired_d) > 2) {
-    const int direction = (get_distance(trigPinFront, echoPinFront) - desired_d) / abs(get_distance(trigPinFront, echoPinFront) - desired_d); // This is either +1 or -1 indicating the direction of travel.
-    for (int i=0; i<2; i++) {
-      motor_run(i, direction * speed/2);
-    }
-  }
-
-  // If this function is called constantly to check the distance, then commment the above and uncomment the below
-  // if (desired_d > get_distance(trigPinFront, echoPinFront) + 5) {
+  // while (abs(get_distance(trigPinFront, echoPinFront) - desired_d) > 5) {
+  //   const uint16_t direction = (get_distance(trigPinFront, echoPinFront) - desired_d > 0)? FORWARD : BACKWARD;
   //   for (int i=0; i<2; i++) {
-  //     motor_run(i, speed);
-  //   }
-  // } else if (desired_d > get_distance(trigPinFront, echoPinFront)) {
-  //   for (int i=0; i<2; i++) {
-  //     motor_run(i, speed/2);
-  //   }
-  // } else if (desired_d > get_distance(trigPinFront, echoPinFront) + 5) {
-  //   for (int i=0; i<2; i++) {
-  //     motor_run(i, -speed);
-  //   }
-  // } else {
-  //   for (int i=0; i<2; i++) {
-  //     motor_run(i, -speed/2);
+  //     motor_run(i, speed, direction);
   //   }
   // }
+  //
+  // while (abs(get_distance(trigPinFront, echoPinFront) - desired_d) > 2) {
+  //   const int direction = (get_distance(trigPinFront, echoPinFront) - desired_d) / abs(get_distance(trigPinFront, echoPinFront) - desired_d); // This is either +1 or -1 indicating the direction of travel.
+  //   for (int i=0; i<2; i++) {
+  //     motor_run(i, direction * speed/2);
+  //   }
+  // }
+
+  const uint16_t direction = (get_distance(trigPinFront, echoPinFront) > desired_d) ? FORWARD : BACKWARD;
+  
+  // If this function is called constantly to check the distance, then commment the above and uncomment the below
+  if (abs(desired_d - get_distance(trigPinFront, echoPinFront)) > 5) {
+    for (int i=0; i<2; i++) {
+      motor_run(i, speed, direction);
+    }
+  } else if (abs(desired_d - get_distance(trigPinFront, echoPinFront)) > 5) {
+    for (int i=0; i<2; i++) {
+      motor_run(i, speed, direction);
+    }
+  }
+
+
+
+
+  if (desired_d > get_distance(trigPinFront, echoPinFront) + 5) {
+    for (int i=0; i<2; i++) {
+      // motor_run(i, speed);
+      motor_run(i, speed, direction);
+    }
+  } else if (desired_d > get_distance(trigPinFront, echoPinFront)) {
+    for (int i=0; i<2; i++) {
+      motor_run(i, speed/2, direction);
+    }
+  } else if (desired_d > get_distance(trigPinFront, echoPinFront) + 5) {
+    for (int i=0; i<2; i++) {
+      motor_run(i, -speed);
+    }
+  } else {
+    for (int i=0; i<2; i++) {
+      motor_run(i, -speed/2);
+    }
+  }
 }
 
 void move_forward(float speed) {
