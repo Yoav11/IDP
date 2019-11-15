@@ -1,11 +1,6 @@
 #include <Arduino.h>
 
-int bearing;
-bool move_forward_till_is_on = false;
-
-// Remove this after testing
-// void motor_begin();
-// void motor_run(int motor_index, float speed); // motot_index
-// void motor_stop();
-// void motor_turn(float angle);
-// ------------
+bool move_forward_till_on();
+void set_move_forward_till(bool on);
+void move_forward_till(float desired_d, float speed);
+void move_forward(float speed);
