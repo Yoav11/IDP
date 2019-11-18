@@ -5,7 +5,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *left_motor = AFMS.getMotor(1);
 Adafruit_DCMotor *right_motor = AFMS.getMotor(2);
 bool has_to_stop = false;
-float time_to_stop;
+float time_to_stop = -1;
 float stop_tick;
 int routine_step = -1;
 uint16_t old_speeds[2] = {0, 0}; // Stores last speed for each motor
@@ -18,9 +18,9 @@ void motor_begin() {
 void motor_run(int motor_index, uint16_t speed, uint16_t direction) {
     Adafruit_DCMotor *motor = motor_index == 1 ? left_motor : right_motor;
 
-    if (old_speeds[motor_index-1] == speed && old_direcs[motor_index-1] == direction) {
-      return; // If the new instruction is exactly the same as the last one, don't send any commands and just return.
-    }
+    // if (old_speeds[motor_index-1] == speed && old_direcs[motor_index-1] == direction) {
+    //   return; // If the new instruction is exactly the same as the last one, don't send any commands and just return.
+    // }
 
     // The below will run if the new instruction is different.
     motor->setSpeed(speed);
@@ -41,7 +41,6 @@ void motor_turn(float angle) {
         motor_run(2, 100, FORWARD);
     } else {
         time_to_stop = map(angle, -360, 0, 12400, 0);
-        Serial.println(time_to_stop);
         motor_run(1, 100, BACKWARD);
         motor_run(2, 100, BACKWARD);
     }
@@ -53,8 +52,8 @@ bool stop_ticker() {
         stop_tick = millis();
         has_to_stop = false;
     }
-    if(millis()-stop_tick >= time_to_stop) {
-        Serial.println(stop_tick);
+    if(millis()-stop_tick >= time_to_stop && time_to_stop > 0) {
+        time_to_stop = -1;
         motor_stop();
         routine_step++;
         return true;
