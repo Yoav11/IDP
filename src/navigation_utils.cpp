@@ -83,7 +83,6 @@ void move_forward(float speed) {
 // This function would turn the robot to face a desired bearing.
 void change_direction(int final_bearing) {
   motor_stop();
-  delay(500);
   if (abs(final_bearing-bearing) < 180) {
     motor_turn(final_bearing - bearing);
   } else if (bearing >= 0 && bearing <= 180) {
