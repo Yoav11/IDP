@@ -37,6 +37,8 @@ void move_forward_till(float desired_d, float speed) {
   const uint16_t motor_1_direc = (distance > desired_d) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
 
+  Serial.print("distance: ");
+  Serial.println(distance);
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
   if (abs(error) >= 10) {
