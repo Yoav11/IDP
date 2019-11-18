@@ -3,9 +3,10 @@
 int bearing;
 bool move_forward_till_is_on = false;
 
-// Remove this after testing
-// void motor_begin();
-// void motor_run(int motor_index, float speed); // motot_index
-// void motor_stop();
-// void motor_turn(float angle);
-// ------------
+void move_forward_till(float desired_d, float speed);
+void move_forward(float speed);
+void face_north();
+void face_south();
+void face_west();
+void face_east();
+void return_to_base(float turnSpeed, float speed);

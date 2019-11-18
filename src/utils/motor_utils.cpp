@@ -20,8 +20,8 @@ void motor_run(int motor_index, uint16_t speed, uint16_t direction) {
 }
 
 void motor_stop() {
-    left_motor->run(RELEASE);
-    right_motor->run(RELEASE);
+    left_motor->setSpeed(0);
+    right_motor->setSpeed(0);
 }
 
 void motor_turn(float angle) {
