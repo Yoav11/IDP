@@ -16,8 +16,7 @@ void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
-    delay(3000);
-
+    delay(1000);
     set_move_forward_till(true);
     ultrasound_setup(trigPinFront, echoPinFront);
 }
@@ -44,5 +43,4 @@ void loop() {
             step = -1;
             break;
     }
-    // move_forward(0.5);
 }
