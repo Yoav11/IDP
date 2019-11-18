@@ -39,11 +39,11 @@ void move_forward_till(float desired_d, float speed) {
 
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
-  if (abs(error) >= 10) {
+  if (abs(error) >= 15) {
     speed_outOf_255 = convert_to_speed_outOf_255(speed);
-  } else if (abs(error) > 5) {
+} else if (abs(error) > 10) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.5);
-  } else if (abs(error) > 3) {
+} else if (abs(error) > 5) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.4);
   } else if (abs(error) >  1) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.2);
@@ -70,13 +70,25 @@ void move_forward(float speed) {
 // This function would turn the robot to face a desired bearing.
 void change_direction(int final_bearing) {
   motor_stop();
-  if (abs(final_bearing-bearing) < 180) {
-    motor_turn(final_bearing - bearing);
-  } else if (bearing >= 0 && bearing <= 180) {
-    motor_turn((final_bearing-360) - bearing);
-  } else {
-    motor_turn((final_bearing+360) - bearing);
+
+  int actual_fin_bearing = final_bearing;
+  if (final_bearing < 0) {
+      while (actual_fin_bearing < 0) {
+          actual_fin_bearing += 360;
+      }
+  } else if (final_bearing > 360) {
+      while (actual_fin_bearing > 360) {
+          actual_fin_bearing -= 360;
+      }
   }
 
-  bearing = final_bearing;
+  if (abs(actual_fin_bearing-bearing) < 180) {
+    motor_turn(actual_fin_bearing - bearing);
+  } else if (bearing >= 0 && bearing <= 180) {
+    motor_turn((actual_fin_bearing-360) - bearing);
+  } else {
+    motor_turn((actual_fin_bearing+360) - bearing);
+  }
+
+  bearing = actual_fin_bearing;
 }

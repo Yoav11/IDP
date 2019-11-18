@@ -6,6 +6,7 @@
 
 int old_routine_step;
 bool stopped = true;
+int phase = 0;
 int step = 0;
 float current_time;
 float distance;
@@ -22,17 +23,24 @@ void setup() {
 
 void loop() {
     stopped = stop_ticker();
-
+    if(stopped) {
+        Serial.println("finished turn");
+        step = 0;
+    }
     switch(step){
         case 0:
             if (move_forward_till_on()) {
-              move_forward_till(5, 1.0);
+              move_forward_till(10, 1.0);
             } else {
                 step++;
+                set_move_forward_till(true);
+                Serial.println("start turn");
             }
             break;
         case 1:
-            change_direction(0);
+            change_direction(0+phase);
+            phase-= 90;
+            step = -1;
             break;
     }
 }
