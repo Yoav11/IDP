@@ -7,7 +7,7 @@ void ultrasound_setup(int trigPin, int echoPin) {
 
 }
 
-// This function returns the distance from the sensor to an object in cm. To use this function, to the following
+// This function returns the distance from the sensor to an object in cm. Make sure to run the set up function before use!
 int get_distance(int trigPin, int echoPin) {
   // defines variables
   long duration;
