@@ -8,6 +8,8 @@ bool has_to_stop = false;
 float time_to_stop;
 float stop_tick;
 int routine_step = -1;
+uint16_t old_speeds[2] = {0, 0}; // Stores last speed for each motor
+uint16_t old_direcs[2] = {FORWARD, BACKWARD}; // Stores last moving direction for each motor
 
 void motor_begin() {
     AFMS.begin();
@@ -15,8 +17,16 @@ void motor_begin() {
 
 void motor_run(int motor_index, uint16_t speed, uint16_t direction) {
     Adafruit_DCMotor *motor = motor_index == 1 ? left_motor : right_motor;
+
+    if (old_speeds[motor_index-1] == speed && old_direcs[motor_index-1] == direction) {
+      return; // If the new instruction is exactly the same as the last one, don't send any commands and just return.
+    }
+
+    // The below will run if the new instruction is different.
     motor->setSpeed(speed);
     motor->run(direction);
+    old_speeds[motor_index-1] = speed;
+    old_direcs[motor_index-1] = direction;
 }
 
 void motor_stop() {

@@ -11,11 +11,15 @@ int step = 0;
 float current_time;
 float distance;
 
+
 void setup() {
-    pinMode(LED_BUILTIN, OUTPUT);
+    // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
     delay(3000);
+
+    set_move_forward_till(true);
+    ultrasound_setup(trigPinFront, echoPinFront);
 }
 
 void loop() {
@@ -47,7 +51,7 @@ void loop() {
             case 5:
                 move_forward_till(30, 200);
                 step++;
-                break; 
+                break;
             case 6:
                 face_south();
                 break;
@@ -57,4 +61,5 @@ void loop() {
                 break;
         }
     }
+    // move_forward(0.5);
 }
