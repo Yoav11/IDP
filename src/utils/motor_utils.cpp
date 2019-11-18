@@ -18,9 +18,9 @@ void motor_begin() {
 void motor_run(int motor_index, uint16_t speed, uint16_t direction) {
     Adafruit_DCMotor *motor = motor_index == 1 ? left_motor : right_motor;
 
-    if (old_speeds[motor_index-1] == speed && old_direcs[motor_index-1] == direction) {
-      return; // If the new instruction is exactly the same as the last one, don't send any commands and just return.
-    }
+    // if (old_speeds[motor_index-1] == speed && old_direcs[motor_index-1] == direction) {
+    //   return; // If the new instruction is exactly the same as the last one, don't send any commands and just return.
+    // }
 
     // The below will run if the new instruction is different.
     motor->setSpeed(speed);
@@ -41,7 +41,6 @@ void motor_turn(float angle) {
         motor_run(2, 100, FORWARD);
     } else {
         time_to_stop = map(angle, -360, 0, 11000, 0);
-        Serial.println(time_to_stop);
         motor_run(1, 100, BACKWARD);
         motor_run(2, 100, BACKWARD);
     }
@@ -54,7 +53,6 @@ bool stop_ticker() {
         has_to_stop = false;
     }
     if(millis()-stop_tick >= time_to_stop) {
-        Serial.println(stop_tick);
         motor_stop();
         routine_step++;
         return true;
