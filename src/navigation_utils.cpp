@@ -39,37 +39,24 @@ void move_forward_till(float desired_d, float speed) {
 
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
-  if (abs(error) >= 10) {
+  if (abs(error) >= 15) {
     speed_outOf_255 = convert_to_speed_outOf_255(speed);
-    Serial.print("Phase 0: Far away from desired distance");
-    Serial.println(error);
-  } else if (abs(error) > 5) {
+} else if (abs(error) > 10) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.5);
-    Serial.print("Manual maneuvring Phase 1. Error: ");
-    Serial.println(error);
-  } else if (abs(error) > 3) {
+} else if (abs(error) > 5) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.4);
-    Serial.print("Manual maneuvring Phase 2. Error: ");
-    Serial.println(error);
   } else if (abs(error) >  1) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.2);
-    Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
-    Serial.println(error);
   } else if (abs(error) >  0) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.15);
-    Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
-    Serial.println(error);
   } else {
     motor_stop();
     move_forward_till_is_on = false;
-    Serial.println("Phase 5: Robot stopping since we reached the desired distance");
   }
 
   for (int i=1; i<3; i++) {
     if (move_forward_till_is_on) {
       motor_run(i, speed_outOf_255, (i==1) ? motor_1_direc : motor_2_direc);
-      Serial.print("setting speed at: ");
-      Serial.println(speed_outOf_255);
     }
   }
 }
@@ -83,75 +70,25 @@ void move_forward(float speed) {
 // This function would turn the robot to face a desired bearing.
 void change_direction(int final_bearing) {
   motor_stop();
-  delay(500);
-  if (abs(final_bearing-bearing) < 180) {
-    motor_turn(final_bearing - bearing);
+
+  int actual_fin_bearing = final_bearing;
+  if (final_bearing < 0) {
+      while (actual_fin_bearing < 0) {
+          actual_fin_bearing += 360;
+      }
+  } else if (final_bearing > 360) {
+      while (actual_fin_bearing > 360) {
+          actual_fin_bearing -= 360;
+      }
+  }
+
+  if (abs(actual_fin_bearing-bearing) < 180) {
+    motor_turn(actual_fin_bearing - bearing);
   } else if (bearing >= 0 && bearing <= 180) {
-    motor_turn((final_bearing-360) - bearing);
+    motor_turn((actual_fin_bearing-360) - bearing);
   } else {
-    motor_turn((final_bearing+360) - bearing);
+    motor_turn((actual_fin_bearing+360) - bearing);
   }
 
-  // HERE WE NEED A LITTLE CHECK TO ADJUST THE ANGLE
-
-  bearing = final_bearing;
-}
-
-void face_north() {
-  motor_stop(); // Stop before turning just in case it hasn't stopped.
-  if (bearing >= 0 && bearing <= 180) { // If it's facing to the East ish, turn anti-clockwise to face North.
-    motor_turn(0 - bearing);
-  } else { // If it's facing to the West ish, turn clockwise to face North.
-    motor_turn(360-bearing);
-  }
-
-  bearing = 0;
-}
-
-void face_south() {
-  motor_stop(); // Stop before turning just in case it hasn't stopped.
-  motor_turn(180-bearing);
-
-  bearing = 180;
-}
-
-void face_east() {
-  motor_stop(); // Stop before turning just in case it hasn't stopped.
-  if (bearing >= 270 && bearing <= 360) { // If it's facing to the North West ish, turn clockwise to face East.
-    motor_turn(450 - bearing);
-  } else { // Elswhere, 90-bearing should do the job whichever direction we are turning.
-    motor_turn(90 - bearing);
-  }
-
-  bearing = 90;
-}
-
-void face_west() {
-  motor_stop();
-  if (bearing >= 0 && bearing <= 90) {
-    motor_turn(-90 - bearing);
-  } else {
-    motor_turn(270 - bearing);
-  }
-
-  bearing = 270;
-}
-
-// Upon calling this function once, the robot returns to base.
-void return_to_base(float turnSpeed, float speed) {
-  face_west();
-
-  while (get_distance(trigPinFront, echoPinFront) > 10) {
-    move_forward(speed);
-  }
-
-  motor_stop();
-
-  if (get_distance(trigPinLeft, echoPinLeft) < 200) {
-    face_north();
-    move_forward_till(45, speed);
-  } else {
-    face_south();
-    move_forward_till(200, speed);
-  }
+  bearing = actual_fin_bearing;
 }
