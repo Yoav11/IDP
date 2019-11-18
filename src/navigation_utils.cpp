@@ -45,6 +45,8 @@ void move_forward_till(float desired_d, float speed) {
     speed_outOf_255 = convert_to_speed_outOf_255(speed);
 } else if (abs(error) > 10) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.5);
+    Serial.print("Manual maneuvring Phase 1. Error: ");
+    Serial.println(error);
 } else if (abs(error) > 5) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.4);
     Serial.print("Manual maneuvring Phase 2. Error: ");
