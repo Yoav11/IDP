@@ -1,9 +1,12 @@
 #include <navigation_utils.h>
 #include <ultrasound_utils.h>
 #include <motor_utils.h>
+#include <ArduinoSort.h>
 
 int bearing = 90;
 bool move_forward_till_is_on = false;
+int good_distance_count = 0;
+int good_distances[10];
 
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
@@ -104,4 +107,25 @@ void change_direction(int final_bearing) {
   }
 
   bearing = actual_fin_bearing;
+}
+
+int detected_mine(int trigPinLeft, int echoPinLeft) {
+  int distance = get_distance(trigPinLeft, echoPinLeft);
+  if (distance < 80) {
+    good_distances[good_distance_count] = distance;
+    good_distance_count++;
+  } else {
+    good_distance_count = 0;
+    return -1;
+  }
+
+  if (good_distance_count == 5) {
+    sortArray(good_distances, 10);
+    good_distance_count = 0;
+    Serial.print("Detected mine at:");
+    Serial.println(good_distances[4]);
+    return good_distances[4];
+  }
+
+  return -2;
 }
