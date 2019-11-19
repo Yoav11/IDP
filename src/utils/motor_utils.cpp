@@ -36,11 +36,11 @@ void motor_stop() {
 
 void motor_turn(float angle) {
     if(angle >= 0){
-        time_to_stop = map(angle, 0, 360, 0, 12400);
+        time_to_stop = map(angle, 0, 360, 0, 12050);
         motor_run(1, 100, FORWARD);
         motor_run(2, 100, FORWARD);
     } else {
-        time_to_stop = map(angle, -360, 0, 12400, 0);
+        time_to_stop = map(angle, -360, 0, 12050, 0);
         motor_run(1, 100, BACKWARD);
         motor_run(2, 100, BACKWARD);
     }
@@ -52,7 +52,7 @@ bool stop_ticker() {
         stop_tick = millis();
         has_to_stop = false;
     }
-    if(millis()-stop_tick >= time_to_stop && time_to_stop > 0) {
+    if(millis()-stop_tick >= time_to_stop && time_to_stop >= 0) {
         time_to_stop = -1;
         motor_stop();
         routine_step++;

@@ -18,7 +18,6 @@ void setup() {
     motor_begin();
     delay(1000);
     set_move_forward_till(true);
-    ultrasound_setup(trigPinFront, echoPinFront);
 }
 
 void loop() {
