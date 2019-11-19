@@ -1,9 +1,12 @@
 #include <navigation_utils.h>
 #include <ultrasound_utils.h>
 #include <motor_utils.h>
+#include <ArduinoSort.h>
 
 int bearing = 90;
 bool move_forward_till_is_on = false;
+int good_distance_count = 0;
+int good_distances[10];
 
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
@@ -37,26 +40,39 @@ void move_forward_till(float desired_d, float speed) {
   const uint16_t motor_1_direc = (distance > desired_d) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
 
+  Serial.print("distance: ");
+  Serial.println(distance);
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
   if (abs(error) >= 15) {
     speed_outOf_255 = convert_to_speed_outOf_255(speed);
 } else if (abs(error) > 10) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.5);
+    Serial.print("Manual maneuvring Phase 1. Error: ");
+    Serial.println(error);
 } else if (abs(error) > 5) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.4);
+    Serial.print("Manual maneuvring Phase 2. Error: ");
+    Serial.println(error);
   } else if (abs(error) >  1) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.2);
+    Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
+    Serial.println(error);
   } else if (abs(error) >  0) {
     speed_outOf_255 = convert_to_speed_outOf_255(0.15);
+    Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
+    Serial.println(error);
   } else {
     motor_stop();
     move_forward_till_is_on = false;
+    Serial.println("Phase 5: Robot stopping since we reached the desired distance");
   }
 
   for (int i=1; i<3; i++) {
     if (move_forward_till_is_on) {
       motor_run(i, speed_outOf_255, (i==1) ? motor_1_direc : motor_2_direc);
+      Serial.print("setting speed at: ");
+      Serial.println(speed_outOf_255);
     }
   }
 }
@@ -91,4 +107,25 @@ void change_direction(int final_bearing) {
   }
 
   bearing = actual_fin_bearing;
+}
+
+int detected_mine(int trigPinLeft, int echoPinLeft) {
+  int distance = get_distance(trigPinLeft, echoPinLeft);
+  if (distance < 80) {
+    good_distances[good_distance_count] = distance;
+    good_distance_count++;
+  } else {
+    good_distance_count = 0;
+    return -1;
+  }
+
+  if (good_distance_count == 5) {
+    sortArray(good_distances, 10);
+    good_distance_count = 0;
+    Serial.print("Detected mine at:");
+    Serial.println(good_distances[4]);
+    return good_distances[4];
+  }
+
+  return -2;
 }
