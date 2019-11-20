@@ -40,8 +40,6 @@ void move_forward_till(float desired_d, float speed) {
   const uint16_t motor_1_direc = (distance > desired_d) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
 
-  Serial.print("distance: ");
-  Serial.println(distance);
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
   if (abs(error) >= 15) {
@@ -71,8 +69,6 @@ void move_forward_till(float desired_d, float speed) {
   for (int i=1; i<3; i++) {
     if (move_forward_till_is_on) {
       motor_run(i, speed_outOf_255, (i==1) ? motor_1_direc : motor_2_direc);
-      Serial.print("setting speed at: ");
-      Serial.println(speed_outOf_255);
     }
   }
 }
@@ -122,8 +118,6 @@ int detected_mine(int trigPinLeft, int echoPinLeft) {
   if (good_distance_count == 5) {
     sortArray(good_distances, 10);
     good_distance_count = 0;
-    Serial.print("Detected mine at:");
-    Serial.println(good_distances[4]);
     return good_distances[4];
   }
 
