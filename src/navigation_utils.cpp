@@ -109,6 +109,7 @@ void change_direction(int final_bearing) {
   bearing = actual_fin_bearing;
 }
 
+// This function returns a positive number if a mine is detected (in cm), and a negative number if not detected. Call it in the loop function.
 int detected_mine(int trigPinLeft, int echoPinLeft) {
   int distance = get_distance(trigPinLeft, echoPinLeft);
   if (distance < 80) {
