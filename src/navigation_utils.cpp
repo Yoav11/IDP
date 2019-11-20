@@ -123,8 +123,11 @@ int detected_mine(int trigPinLeft, int echoPinLeft) {
   if (good_distance_count == 5) {
     sortArray(good_distances, 10);
     good_distance_count = 0;
+<<<<<<< HEAD
     Serial.print("Detected mine at:");
     Serial.println(good_distances[4]);
+=======
+>>>>>>> 6f5d6c55e33d8c5060b98bb5a359eaf7e6984ce8
     return good_distances[4];
   }
 

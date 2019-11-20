@@ -52,7 +52,7 @@ bool stop_ticker() {
         stop_tick = millis();
         has_to_stop = false;
     }
-    if(millis()-stop_tick >= time_to_stop && time_to_stop > 0) {
+    if(millis()-stop_tick >= time_to_stop && time_to_stop >= 0) {
         time_to_stop = -1;
         motor_stop();
         routine_step++;
