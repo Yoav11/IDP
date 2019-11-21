@@ -179,7 +179,20 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       if (stopped_turning) {break;}
 
       // Serial.println("move_to phase 2: go to first wall");
-      move_forward_till((horizontal_first ? x : y), 1.0, true);
+      if (horizontal_first) {
+        if (x > (240-robot_length)/2) {
+          move_forward_till(240 - robot_length - x, 1.0, false);
+        } else {
+          move_forward_till(x, 1.0, true);
+        }
+      } else {
+        if (y > (240-robot_length)/2) {
+          move_forward_till(240 - robot_length - y, 1.0, false);
+        } else {
+          move_forward_till(y, 1.0, true);
+        }
+      }
+      // move_forward_till((horizontal_first ? x : y), 1.0, true);
 
       if (!move_forward_till_on()) { // when the robot has stopped
         Serial.println("robot has stopped");
@@ -245,7 +258,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
         current_time = millis();
         get_to_mine_first_run = false;
       }
-      if (current_time - millis() > duration) {
+      if (millis() - current_time > duration) {
         motor_stop();
         get_to_mine_phase++;
       }
@@ -282,7 +295,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
         current_time = millis();
         get_to_mine_go_back_up_first = false;
       }
-      if (current_time - millis() > duration) {
+      if (millis() - current_time > duration) {
         motor_stop();
         get_to_mine_phase++;
       }
