@@ -7,6 +7,7 @@ void set_move_forward_till(bool on);
 void move_forward_till(float desired_d, float speed, bool using_front_sensor);
 void move_forward(float speed);
 void change_direction(int final_bearing);
+void return_to_base(bool stopped);
 int detected_mine(int trigPinLeft, int echoPinLeft);
 bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_turning, int final_bearing);
 bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning);
