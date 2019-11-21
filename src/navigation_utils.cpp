@@ -12,6 +12,8 @@ int move_to_phase = 0;
 bool move_to_is_on = false;
 int get_to_mine_phase = 0;
 bool get_to_mine_is_on = false;
+bool get_to_mine_first_run = true;
+bool get_to_mine_go_back_up_first = true;
 
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
@@ -38,6 +40,8 @@ void start_get_to_mine() {
 void stop_get_to_mine() {
   get_to_mine_is_on = false;
   get_to_mine_phase = 0;
+  get_to_mine_first_run = true;
+  get_to_mine_go_back_up_first = true;
 }
 
 // Converts the speed (-1 to 1) to the speed that can be read by the motors (0 to 255). Only the magnitude counts.
@@ -60,7 +64,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   if (!move_forward_till_on()) {return;}
 
   // NEEDS CHANGE HERE WHEN WE START USING THE BACK SENSOR
-  const int distance = get_distance(trigPinFront, echoPinFront);
+  const int distance = get_distance(using_front_sensor ? trigPinFront : trigPinBack, using_front_sensor ? echoPinFront : echoPinBack);
   const float error = desired_d-distance;
   const uint16_t motor_1_direc = (using_front_sensor ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
@@ -231,14 +235,20 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   if (!get_to_mine_is_on) {return;}
 
+  int current_time;
   int duration = 500; // ms
   switch (get_to_mine_phase) {
     case 0: // back up a bit
       Serial.println("get_to_mine phase 0: Backing up a bit");
       move_forward(-speed);
-      delay(duration);
-      motor_stop();
-      get_to_mine_phase++;
+      if (get_to_mine_first_run){
+        current_time = millis();
+        get_to_mine_first_run = false;
+      }
+      if (current_time - millis() > duration) {
+        motor_stop();
+        get_to_mine_phase++;
+      }
       break;
     case 1: // turn north
       Serial.println("get_to_mine phase 1: turning north");
@@ -253,7 +263,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       break;
     case 3: // move up north
       if (stopped_turning) {break;}
-      move_forward_till(distance_up_north, 1.0, false); // CHANGE THE FUNCTION TO ACCOUNT FOR BACK SENSOR BEFORE USE
+      move_forward_till(distance_up_north, 1.0, false);
       if (!move_forward_till_on()) {
         Serial.println("get_to_mine phase 3 end: finished moving up north");
         get_to_mine_phase++;
@@ -268,9 +278,14 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       if (!stopped_turning) {break;}
       Serial.println("get_to_mine phase 5: moving forward towards the mine");
       move_forward(speed);
-      delay(duration);
-      motor_stop();
-      get_to_mine_phase++;
+      if (get_to_mine_go_back_up_first){
+        current_time = millis();
+        get_to_mine_go_back_up_first = false;
+      }
+      if (current_time - millis() > duration) {
+        motor_stop();
+        get_to_mine_phase++;
+      }
       break;
     case 6:
       Serial.println("Got to the mine!");
