@@ -1,10 +1,13 @@
 #include <ultrasound_utils.h>
 
 // Set up an ultrasound distance sensor
-void ultrasound_setup(int trigPin, int echoPin) {
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-
+void ultrasound_setup() {
+  pinMode(trigPinFront, OUTPUT);
+  pinMode(echoPinFront, INPUT);
+  pinMode(trigPinLeft, OUTPUT);
+  pinMode(echoPinLeft, INPUT);
+  pinMode(trigPinBack, OUTPUT);
+  pinMode(echoPinBack, INPUT);
 }
 
 // This function returns the distance from the sensor to an object in cm. Make sure to run the set up function before use!
