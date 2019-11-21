@@ -17,6 +17,8 @@ bool get_to_mine_is_on = false;
 bool get_to_mine_first_run = true;
 bool get_to_mine_go_back_up_first = true;
 
+float current_time_mine = 0;
+
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
   return move_forward_till_is_on;
@@ -25,6 +27,9 @@ bool move_forward_till_on() {
 // Set value for whether move_forward_till function should be in use.
 void set_move_forward_till(bool on) {
   move_forward_till_is_on = on;
+  if (!on) {
+      motor_stop();
+  }
 }
 
 void start_move_to() {
@@ -71,8 +76,6 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   const uint16_t motor_1_direc = (using_front_sensor ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
 
-  Serial.print("distance: ");
-  Serial.println(distance);
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
   if (abs(error) >= 15) {
@@ -102,8 +105,6 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   for (int i=1; i<3; i++) {
     if (move_forward_till_is_on) {
       motor_run(i, speed_outOf_255, (i==1) ? motor_1_direc : motor_2_direc);
-      Serial.print("setting speed at: ");
-      Serial.println(speed_outOf_255);
     }
   }
 }
@@ -154,42 +155,12 @@ int detected_mine(int trigPinLeft, int echoPinLeft) {
   if (good_distance_count == 10) {
     sortArray(good_distances, 10);
     good_distance_count = 0;
-    Serial.print("Detected mine at:");
-    Serial.println(good_distances[4]);
     return good_distances[4];
   }
 
   return -2;
 }
 
-<<<<<<< HEAD
-void return_to_base(bool stopped) {
-    if(stopped) {
-        Serial.println("finished turn");
-        return_base_step = 1;
-    }
-
-    switch(return_base_step){
-        case 0:
-            change_direction(-90);
-            return_base_step = -1;
-            break;
-        case 1:
-            if (move_forward_till_on()) {
-              move_forward_till(10, 0.5, true);
-          } else if(!final_base_turn) {
-              return_base_step++;
-          } else {
-              while(1);
-          }
-          break;
-        case 2:
-            change_direction(180);
-            return_base_step = -1;
-            final_base_turn = true;
-            break;
-        }
-=======
 bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_turning, int final_bearing) {
   if (!move_to_is_on) {return;}
   switch (move_to_phase) {
@@ -264,22 +235,20 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
 
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   if (!get_to_mine_is_on) {return;}
-
-  int current_time;
-  int duration = 500; // ms
+  int duration = 1500; // ms
   switch (get_to_mine_phase) {
     case 0: // back up a bit
-      Serial.println("get_to_mine phase 0: Backing up a bit");
-      move_forward(-speed);
-      if (get_to_mine_first_run){
-        current_time = millis();
-        get_to_mine_first_run = false;
-      }
-      if (current_time - millis() > duration) {
-        motor_stop();
-        get_to_mine_phase++;
-      }
-      break;
+        move_forward(-speed);
+        if (get_to_mine_first_run){
+          Serial.println("get_to_mine phase 0: Backing up a bit");
+          current_time_mine = millis();
+          get_to_mine_first_run = false;
+        }
+        if (millis() - current_time_mine > duration) {
+          motor_stop();
+          get_to_mine_phase++;
+        }
+        break;
     case 1: // turn north
       Serial.println("get_to_mine phase 1: turning north");
       change_direction(0);
@@ -309,10 +278,10 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       Serial.println("get_to_mine phase 5: moving forward towards the mine");
       move_forward(speed);
       if (get_to_mine_go_back_up_first){
-        current_time = millis();
+        current_time_mine = millis();
         get_to_mine_go_back_up_first = false;
       }
-      if (current_time - millis() > duration) {
+      if (current_time_mine - millis() > duration) {
         motor_stop();
         get_to_mine_phase++;
       }
@@ -323,5 +292,4 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       return true;
   }
   return false;
->>>>>>> 39da6d9c4ff9c158e933b87729f39d6fa9543904
 }

@@ -13,15 +13,17 @@ int previous_step = 0;
 float current_time;
 float distance;
 
+bool got_to_mine;
+bool got_to_safe_zone;
+bool got_to_base;
 
 void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
     delay(2000);
-    set_move_forward_till(true);
-    ultrasound_setup(trigPinLeft, echoPinLeft);
-    ultrasound_setup(trigPinFront, echoPinFront);
+    ultrasound_setup();
+
 }
 
 void loop() {
@@ -31,6 +33,7 @@ void loop() {
     if(stopped) {
         step = previous_step + 1;
         Serial.println("finished turning");
+        set_move_forward_till(true);
     }
 
     switch(step) {
@@ -41,34 +44,36 @@ void loop() {
             previous_step = 1;
             break;
         case 2:
-            if(move_forward_till_on()) {
-                Serial.println("moving forward");
-                move_forward_till(20, 0.8, true);
-            } else if (distance >= 0){
+            if (distance >= 0){
+                set_move_forward_till(false);
+                start_get_to_mine();
                 step++;
+            }
+            else if(move_forward_till_on()) {
+                move_forward_till(20, 0.8, true);
             } else {
-                step+=2;
+                while(1) {};
             }
             break;
-        // case 3:
-        //     got_to_mine = get_to_mine(distance, 0.8, stopped)
-        //     if(got_to_mine) {
-        //         got_to_mine = false;
-        //         step++;
-        //     }
-        //     break;
-        // case 4:
-        //     got_to_safe_zone = go_to_safe_zone(0.8, true, stopped)
-        //     if(got_to_safe_zone) {
-        //         got_to_safe_zone = false;
-        //         step++;
-        //     }
-        //     break;
-        // case 5:
-        //     got_to_base = got_to_base(0.8, true, stopped)
-        //     if(got_to_base) {
-        //         got_to_base = false;
-        //     }
-        //     break;
+        case 3:
+            got_to_mine = get_to_mine(distance, 0.8, stopped);
+            if(got_to_mine) {
+                got_to_mine = false;
+                step++;
+            }
+            break;
+        case 4:
+            got_to_safe_zone = go_to_safe_zone(0.8, true, stopped);
+            if(got_to_safe_zone) {
+                got_to_safe_zone = false;
+                step++;
+            }
+            break;
+        case 5:
+            got_to_base = return_to_base(0.8, true, stopped);
+            if(got_to_base) {
+                got_to_base = false;
+            }
+            break;
     }
 }

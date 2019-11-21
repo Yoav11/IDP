@@ -2,11 +2,7 @@
 
 bool move_forward_till_on();
 void set_move_forward_till(bool on);
-<<<<<<< HEAD
-void move_forward_till(float desired_d, float speed, bool is_forward);
-=======
 void move_forward_till(float desired_d, float speed, bool using_front_sensor);
->>>>>>> 39da6d9c4ff9c158e933b87729f39d6fa9543904
 void move_forward(float speed);
 void change_direction(int final_bearing);
 void return_to_base(bool stopped);
