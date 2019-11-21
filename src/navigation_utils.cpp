@@ -7,6 +7,8 @@ int bearing = 90;
 bool move_forward_till_is_on = false;
 int good_distance_count = 0;
 int good_distances[10];
+int return_base_step = 0;
+int final_base_turn = false;
 
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
@@ -34,11 +36,11 @@ uint16_t motor_2_direction(float speed) {
 }
 
 // Given speed (-1 to 1) and desired_d (desired distance in cm), this function determines whether it should move and how much power it should give to each motor.
-void move_forward_till(float desired_d, float speed) {
+void move_forward_till(float desired_d, float speed, bool is_forward) {
   const int distance = get_distance(trigPinFront, echoPinFront);
   const float error = desired_d-distance;
-  const uint16_t motor_1_direc = (distance > desired_d) ? FORWARD : BACKWARD;
-  const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
+  const uint16_t motor_1_direc = (is_forward ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
+  const uint16_t motor_2_direc = (is_forward ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
 
   uint16_t speed_outOf_255;
 // Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
@@ -115,11 +117,39 @@ int detected_mine(int trigPinLeft, int echoPinLeft) {
     return -1;
   }
 
-  if (good_distance_count == 5) {
+  if (good_distance_count == 10) {
     sortArray(good_distances, 10);
     good_distance_count = 0;
     return good_distances[4];
   }
 
   return -2;
+}
+
+void return_to_base(bool stopped) {
+    if(stopped) {
+        Serial.println("finished turn");
+        return_base_step = 1;
+    }
+
+    switch(return_base_step){
+        case 0:
+            change_direction(-90);
+            return_base_step = -1;
+            break;
+        case 1:
+            if (move_forward_till_on()) {
+              move_forward_till(10, 0.5, true);
+          } else if(!final_base_turn) {
+              return_base_step++;
+          } else {
+              while(1);
+          }
+          break;
+        case 2:
+            change_direction(180);
+            return_base_step = -1;
+            final_base_turn = true;
+            break;
+        }
 }
