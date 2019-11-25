@@ -98,8 +98,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   const int n_stop_checks = 2;
 
   uint16_t speed_outOf_255;
-  Serial.print("distance detected:");
-  Serial.println(distance);
+
 // Above 15cm, the speed is as specified when calling this function. Below 15cm, we switch to manual maneuvring.
   if (desired_d <= 100) { // If desired_d is small enough, go for the accurate control
     if (abs(error) >= 15) {
@@ -362,20 +361,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       change_direction(90);
       get_to_mine_phase++;
       break;
-    case 5: // approach the mine by the amount we backed up
-      if (!stopped_turning) {break;}
-      Serial.println("get_to_mine phase 5: moving forward towards the mine");
-      move_forward(speed);
-      if (get_to_mine_go_back_up_first){
-        current_time_mine = millis();
-        get_to_mine_go_back_up_first = false;
-      }
-      if (current_time_mine - millis() > duration) {
-        motor_stop();
-        get_to_mine_phase++;
-      }
-      break;
-    case 6:
+    case 5:
       Serial.println("Got to the mine!");
       stop_get_to_mine();
       return true;
