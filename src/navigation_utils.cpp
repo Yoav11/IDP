@@ -361,26 +361,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       change_direction(90);
       get_to_mine_phase++;
       break;
-<<<<<<< HEAD
-    case 5: // approach the mine by the amount we backed up
-      // if (!stopped_turning) {break;}
-      // Serial.println("get_to_mine phase 5: moving forward towards the mine");
-      // move_forward(speed);
-      // if (get_to_mine_go_back_up_first){
-      //   current_time_mine = millis();
-      //   get_to_mine_go_back_up_first = false;
-      // }
-      // if (millis() - current_time_mine > duration) {
-      //   motor_stop();
-      //   get_to_mine_phase++;
-      // }
-      // break;
-      get_to_mine_phase++;
-      break;
-    case 6:
-=======
     case 5:
->>>>>>> 500e2bff3137e2c233c6578044a7a9ba97274a64
       Serial.println("Got to the mine!");
       stop_get_to_mine();
       return true;
