@@ -125,14 +125,14 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
 
     } else if (abs(error) >  1) {
       set_counts_for_move_forward_till(3);
-      if (move_forward_till_phase_counts[3] >= n_checks) {
+      if (move_forward_till_phase_counts[3] >= n_checks/2) {
         speed_outOf_255 = convert_to_speed_outOf_255(0.2);
         Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
         Serial.println(error);
       }
     } else if (abs(error) >  0) {
       set_counts_for_move_forward_till(4);
-      if (move_forward_till_phase_counts[4] >= n_checks) {
+      if (move_forward_till_phase_counts[4] >= n_checks/2) {
         speed_outOf_255 = convert_to_speed_outOf_255(0.15);
         Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
         Serial.println(error);
@@ -142,7 +142,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
       if (move_forward_till_phase_counts[5] >= n_stop_checks) {
         motor_stop();
       }
-      if (move_forward_till_phase_counts[5] >= n_checks) {
+      if (move_forward_till_phase_counts[5] >= n_stop_checks+1) {
         move_forward_till_is_on = false;
         set_counts_for_move_forward_till_to_zero();
         Serial.println("Phase 5: Robot stopping since we reached the desired distance");
@@ -169,7 +169,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
       if (move_forward_till_phase_counts[3] >= n_stop_checks) {
         motor_stop();
       }
-      if (move_forward_till_phase_counts[3] >= n_checks) {
+      if (move_forward_till_phase_counts[3] >= n_stop_checks+1) {
         move_forward_till_is_on = false;
         set_counts_for_move_forward_till_to_zero();
         Serial.println("move_forward_till manual maneuvering phase 2: Robot stopping since we reached a close enough distance");
