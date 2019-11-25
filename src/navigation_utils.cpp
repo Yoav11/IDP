@@ -4,7 +4,10 @@
 #include <ArduinoSort.h>
 
 int bearing = 90;
+
 bool move_forward_till_is_on = false;
+int move_forward_till_phase_counts[6] = {0, 0, 0, 0, 0, 0};
+
 int good_distance_count = 0;
 int good_distances[10];
 int return_base_step = 0;
@@ -66,6 +69,22 @@ uint16_t motor_2_direction(float speed) {
   return (motor_1_direction(speed) == FORWARD) ? BACKWARD : FORWARD;
 }
 
+void set_counts_for_move_forward_till(int phase) {
+  for (int i=0; i<6; i++) {
+    if (i == phase) {
+      move_forward_till_phase_counts[i]++;
+    } else {
+      move_forward_till_phase_counts[i] = 0;
+    }
+  }
+}
+
+void set_counts_for_move_forward_till_to_zero() {
+  for (int i=0; i<6; i++) {
+    move_forward_till_phase_counts[i] = 0;
+  }
+}
+
 // Given speed (-1 to 1) and desired_d (desired distance in cm) from whichever sensor we're using to the object (whether using the front sensor or back sensor), this function determines whether it should move and how much power it should give to each motor.
 void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   if (!move_forward_till_on()) {return;}
@@ -75,32 +94,89 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   const float error = desired_d-distance;
   const uint16_t motor_1_direc = (using_front_sensor ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
+  const int n_checks = 10;
+  const int n_stop_checks = 2;
 
   uint16_t speed_outOf_255;
-// Above 10cm, the speed is as specified when calling this function. Below 10cm, we switch to manual maneuvring.
-  if (abs(error) >= 15) {
-    speed_outOf_255 = convert_to_speed_outOf_255(speed);
-} else if (abs(error) > 10) {
-    speed_outOf_255 = convert_to_speed_outOf_255(0.5);
-    Serial.print("Manual maneuvring Phase 1. Error: ");
-    Serial.println(error);
-} else if (abs(error) > 5) {
-    speed_outOf_255 = convert_to_speed_outOf_255(0.4);
-    Serial.print("Manual maneuvring Phase 2. Error: ");
-    Serial.println(error);
-  } else if (abs(error) >  1) {
-    speed_outOf_255 = convert_to_speed_outOf_255(0.2);
-    Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
-    Serial.println(error);
-  } else if (abs(error) >  0) {
-    speed_outOf_255 = convert_to_speed_outOf_255(0.15);
-    Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
-    Serial.println(error);
-  } else {
-    motor_stop();
-    move_forward_till_is_on = false;
-    Serial.println("Phase 5: Robot stopping since we reached the desired distance");
+  Serial.print("distance detected:");
+  Serial.println(distance);
+// Above 15cm, the speed is as specified when calling this function. Below 15cm, we switch to manual maneuvring.
+  if (desired_d <= 100) { // If desired_d is small enough, go for the accurate control
+    if (abs(error) >= 15) {
+      set_counts_for_move_forward_till(0);
+      if (move_forward_till_phase_counts[0] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(speed);
+      }
+    } else if (abs(error) > 10) {
+      set_counts_for_move_forward_till(1);
+      if (move_forward_till_phase_counts[1] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(0.5);
+        // Serial.print("Manual maneuvring Phase 1. Error: ");
+        // Serial.println(error);
+      }
+
+    } else if (abs(error) > 5) {
+      set_counts_for_move_forward_till(2);
+      if (move_forward_till_phase_counts[2] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(0.4);
+        // Serial.print("Manual maneuvring Phase 2. Error: ");
+        // Serial.println(error);
+      }
+
+    } else if (abs(error) >  1) {
+      set_counts_for_move_forward_till(3);
+      if (move_forward_till_phase_counts[3] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(0.2);
+        Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
+        Serial.println(error);
+      }
+    } else if (abs(error) >  0) {
+      set_counts_for_move_forward_till(4);
+      if (move_forward_till_phase_counts[4] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(0.15);
+        Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
+        Serial.println(error);
+      }
+    } else {
+      set_counts_for_move_forward_till(5);
+      if (move_forward_till_phase_counts[5] >= n_stop_checks) {
+        motor_stop();
+      }
+      if (move_forward_till_phase_counts[5] >= n_checks) {
+        move_forward_till_is_on = false;
+        set_counts_for_move_forward_till_to_zero();
+        Serial.println("Phase 5: Robot stopping since we reached the desired distance");
+      }
+    }
+  } else { // if desired_d is big, choose the control with a slightly bigger error (~3cm)
+    if (abs(error) >= 15) {
+      set_counts_for_move_forward_till(0);
+      if (move_forward_till_phase_counts[0] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(speed);
+      }
+    } else if (abs(error) > 8) {
+      set_counts_for_move_forward_till(1);
+      if (move_forward_till_phase_counts[1] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(0.5);
+      }
+    } else if (abs(error) > 3) {
+      set_counts_for_move_forward_till(2);
+      if (move_forward_till_phase_counts[2] >= n_checks) {
+        speed_outOf_255 = convert_to_speed_outOf_255(0.3);
+      }
+    } else {
+      set_counts_for_move_forward_till(3);
+      if (move_forward_till_phase_counts[3] >= n_stop_checks) {
+        motor_stop();
+      }
+      if (move_forward_till_phase_counts[3] >= n_checks) {
+        move_forward_till_is_on = false;
+        set_counts_for_move_forward_till_to_zero();
+        Serial.println("move_forward_till manual maneuvering phase 2: Robot stopping since we reached a close enough distance");
+      }
+    }
   }
+
 
   for (int i=1; i<3; i++) {
     if (move_forward_till_is_on) {
