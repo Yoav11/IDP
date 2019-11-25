@@ -12,6 +12,7 @@ int detected_distance;
 int previous_step = 0;
 float current_time;
 float distance;
+float temp_distance;
 
 bool got_to_mine;
 bool got_to_safe_zone;
@@ -28,7 +29,7 @@ void setup() {
 
 void loop() {
     stopped = stop_ticker();
-    distance = detected_mine(trigPinLeft, echoPinLeft);
+    temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 
     if(stopped) {
         step = previous_step + 1;
@@ -44,7 +45,8 @@ void loop() {
             previous_step = 1;
             break;
         case 2:
-            if (distance >= 0){
+            if (temp_distance >= 0){
+                distance = temp_distance;
                 set_move_forward_till(false);
                 start_get_to_mine();
                 step++;
@@ -56,8 +58,9 @@ void loop() {
             }
             break;
         case 3:
-            got_to_mine = get_to_mine(distance, 0.8, stopped);
+            got_to_mine = get_to_mine(distance, 1.0, stopped);
             if(got_to_mine) {
+                Serial.println("go to step4");
                 got_to_mine = false;
                 step++;
             }
