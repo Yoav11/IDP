@@ -47,14 +47,15 @@ void loop() {
                 step++;
             }
             else if(move_forward_till_on()) {
-                move_forward_till(20, 0.3, true);
+                move_forward_till(20, 0.2, true);
             } else {
                 while(1) {};
             }
             break;
         case 4:
-            got_to_mine = get_to_mine(distance, 1.0, stopped);
+            got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
             if(got_to_mine) {
+                start_move_to();
                 Serial.println("go to step4");
                 got_to_mine = false;
                 step++;
@@ -65,6 +66,7 @@ void loop() {
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
                 step++;
+                start_move_to();
             }
             break;
         case 6:

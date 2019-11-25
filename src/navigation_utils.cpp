@@ -94,7 +94,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   const float error = desired_d-distance;
   const uint16_t motor_1_direc = (using_front_sensor ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
   const uint16_t motor_2_direc = (motor_1_direc == FORWARD) ? BACKWARD : FORWARD;
-  const int n_checks = 10;
+  const int n_checks = 6;
   const int n_stop_checks = 2;
 
   uint16_t speed_outOf_255;
@@ -205,7 +205,7 @@ void change_direction(int final_bearing) {
       }
   }
 
-  if (abs(actual_fin_bearing-bearing) < 180) {
+  if (abs(actual_fin_bearing-bearing) <= 180) {
     motor_turn(actual_fin_bearing - bearing);
   } else if (bearing >= 0 && bearing <= 180) {
     motor_turn((actual_fin_bearing-360) - bearing);
@@ -268,7 +268,6 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
           move_forward_till(y, 1.0, true);
         }
       }
-      // move_forward_till((horizontal_first ? x : y), 1.0, true);
 
       if (!move_forward_till_on()) { // when the robot has stopped
         Serial.println("robot has stopped");
@@ -291,7 +290,19 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       if (stopped_turning) {break;}
 
       Serial.println("go_to_safe_zone phase 2: go to north wall");
-      move_forward_till(horizontal_first ? y : x, 1.0, true);
+      if (horizontal_first) { // hence vertical this time
+        if (y > (240-robot_length)/2) { // y is quite big, then use the back sensor
+          move_forward_till(240 - robot_length - y, 1.0, false);
+        } else { // if y is small, then use the front sensor
+          move_forward_till(y, 1.0, true);
+        }
+      } else { // hence horizontal this time
+        if (x > (240-robot_length)/2) { // x is quite big, then use the back sensor
+          move_forward_till(240 - robot_length - x, 1.0, false);
+        } else { // if y is small, then use the front sensor
+          move_forward_till(x, 1.0, true);
+        }
+      }
 
       if (!move_forward_till_on()) { // when the robot has stopped
         move_to_phase++;
@@ -304,26 +315,28 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       break;
     case 7:
       if (!stopped_turning) {break;}
-      Serial.println("Moved to coordinates:");
-      Serial.print(x, y);
+      Serial.print("Moved to coordinates:");
+      Serial.print(x);
+      Serial.print(",");
+      Serial.println(y);
       stop_move_to();
       return true;
-      // break;
+      break;
   }
   return false;
 }
 
 bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
-  return move_to(5, 230, speed, horizontal_first, stopped_turning, 270);
+  return move_to(10, 200, speed, horizontal_first, stopped_turning, 0);
 }
 
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
-  return move_to(20, 20, speed, horizontal_first, stopped_turning, 90);
+  return move_to(10, 20, speed, horizontal_first, stopped_turning, 90);
 }
 
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   if (!get_to_mine_is_on) {return;}
-  int duration = 1500; // ms
+  int duration = 500; // ms
   switch (get_to_mine_phase) {
     case 0: // back up a bit
         move_forward(-speed);
@@ -362,6 +375,10 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       get_to_mine_phase++;
       break;
     case 5:
+      if (!stopped_turning) {break;}
+      get_to_mine_phase++;
+      break;
+    case 6:
       Serial.println("Got to the mine!");
       stop_get_to_mine();
       return true;
