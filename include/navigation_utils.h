@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+const int robot_length = 15;
+
 bool move_forward_till_on();
 void set_move_forward_till(bool on);
 void move_forward_till(float desired_d, float speed, bool using_front_sensor);

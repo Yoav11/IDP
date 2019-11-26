@@ -12,10 +12,11 @@ int detected_distance;
 int previous_step = 0;
 float current_time;
 float distance;
+float temp_distance;
 
-bool got_to_mine;
-bool got_to_safe_zone;
-bool got_to_base;
+bool got_to_mine = false;
+bool got_to_safe_zone = false;
+bool got_to_base = false;
 
 void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
@@ -23,53 +24,52 @@ void setup() {
     motor_begin();
     delay(2000);
     ultrasound_setup();
-
+    start_get_to_mine();
 }
 
 void loop() {
     stopped = stop_ticker();
-    distance = detected_mine(trigPinLeft, echoPinLeft);
-
-    if(stopped) {
-        step = previous_step + 1;
-        Serial.println("finished turning");
-        set_move_forward_till(true);
-    }
+    temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 
     switch(step) {
         case 1:
-            Serial.println("turning");
             change_direction(90);
-            step = -1;
-            previous_step = 1;
+            step++;
             break;
         case 2:
-            if (distance >= 0){
-                set_move_forward_till(false);
-                start_get_to_mine();
+            if (!stopped) {break;}
+            step++;
+            set_move_forward_till(true);
+            break;
+        case 3:
+            if (temp_distance >= 0){
+                distance = temp_distance;
                 step++;
             }
             else if(move_forward_till_on()) {
-                move_forward_till(20, 0.8, true);
+                move_forward_till(20, 0.2, true);
             } else {
                 while(1) {};
             }
             break;
-        case 3:
-            got_to_mine = get_to_mine(distance, 0.8, stopped);
+        case 4:
+            got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
             if(got_to_mine) {
+                start_move_to();
+                Serial.println("go to step4");
                 got_to_mine = false;
                 step++;
             }
             break;
-        case 4:
+        case 5:
             got_to_safe_zone = go_to_safe_zone(0.8, true, stopped);
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
                 step++;
+                start_move_to();
             }
             break;
-        case 5:
+        case 6:
             got_to_base = return_to_base(0.8, true, stopped);
             if(got_to_base) {
                 got_to_base = false;
