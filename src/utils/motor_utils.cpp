@@ -36,11 +36,11 @@ void motor_stop() {
 
 void motor_turn(float angle) {
     if(angle >= 0){
-        time_to_stop = map(angle, 0, 360, 0, 12050);
+        time_to_stop = map(angle, 0, 360, 0, 11500);
         motor_run(1, 100, FORWARD);
         motor_run(2, 100, FORWARD);
     } else {
-        time_to_stop = map(angle, -360, 0, 12050, 0);
+        time_to_stop = map(angle, -360, 0, 11500, 0);
         motor_run(1, 100, BACKWARD);
         motor_run(2, 100, BACKWARD);
     }
