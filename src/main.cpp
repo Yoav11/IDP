@@ -18,14 +18,15 @@ bool got_to_mine = false;
 bool got_to_safe_zone = false;
 bool got_to_base = false;
 
-int side_phase = 90;
+int robot_bearing;
 
 void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
-    delay(2000);
+    delay(4000);
     ultrasound_setup();
+    robot_bearing = get_bearing();
 }
 
 void loop() {
@@ -34,7 +35,8 @@ void loop() {
 
     switch(step) {
         case 1:
-            change_direction(side_phase);
+            motor_turn(1080);
+            robot_bearing = get_bearing();
             step++;
             break;
         case 2:
@@ -43,6 +45,7 @@ void loop() {
             set_move_forward_till(true);
             break;
         case 3:
+            delay(100000);
             if (temp_distance >= 0){
                 distance = temp_distance;
                 start_get_to_mine();
@@ -51,7 +54,7 @@ void loop() {
             else if(move_forward_till_on()) {
                 move_forward_till(20, 0.3, true);
             } else {
-                side_phase -= 90;
+                robot_bearing -= 90;
                 step = 1;
             }
             break;
@@ -64,7 +67,8 @@ void loop() {
             }
             break;
         case 5:
-            // do gripper stuff
+            // gripper time
+            delay(1000);
             step++;
             break;
         case 6:
@@ -76,15 +80,16 @@ void loop() {
             }
             break;
         case 7:
-            // do gripper stuff
+            // gripper time
+            delay(1000);
             step++;
             break;
         case 8:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;
-                got_to_base = false;
-                side_phase = 90;
+                 got_to_base = false;
+                robot_bearing = get_bearing();
             }
             break;
     }

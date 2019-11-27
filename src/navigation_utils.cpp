@@ -27,6 +27,10 @@ bool move_forward_till_on() {
   return move_forward_till_is_on;
 }
 
+int get_bearing() {
+    return bearing;
+}
+
 // Set value for whether move_forward_till function should be in use.
 void set_move_forward_till(bool on) {
   move_forward_till_is_on = on;
