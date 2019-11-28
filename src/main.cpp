@@ -19,6 +19,8 @@ bool got_to_mine = false;
 bool got_to_safe_zone = false;
 bool got_to_base = false;
 
+int robot_bearing;
+
 void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
@@ -26,8 +28,7 @@ void setup() {
     servo_setup();
     delay(2000);
     ultrasound_setup();
-    // start_get_to_mine();
-    // start_adjust_angle();
+    robot_bearing = get_bearing();
 }
 
 void loop() {
@@ -39,7 +40,8 @@ void loop() {
 
     switch(step) {
         case 1:
-            change_direction(90);
+            change_direction(robot_bearing);
+            robot_bearing = get_bearing();
             step++;
             break;
         case 2:
@@ -50,35 +52,48 @@ void loop() {
         case 3:
             if (temp_distance >= 0){
                 distance = temp_distance;
+                start_get_to_mine();
                 step++;
             }
             else if(move_forward_till_on()) {
-                move_forward_till(20, 0.2, true);
+                move_forward_till(20, 0.3, true);
             } else {
-                while(1) {};
+                robot_bearing -= 90;
+                step = 1;
             }
             break;
         case 4:
             got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
             if(got_to_mine) {
                 start_move_to();
-                Serial.println("go to step4");
                 got_to_mine = false;
                 step++;
             }
             break;
         case 5:
-            got_to_safe_zone = go_to_safe_zone(0.8, true, stopped);
+            // gripper time
+            delay(1000);
+            step++;
+            break;
+        case 6:
+            got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
                 step++;
                 start_move_to();
             }
             break;
-        case 6:
-            got_to_base = return_to_base(0.8, true, stopped);
+        case 7:
+            // gripper time
+            delay(1000);
+            step++;
+            break;
+        case 8:
+            got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
-                got_to_base = false;
+                step = 1;
+                 got_to_base = false;
+                robot_bearing = get_bearing();
             }
             break;
     }

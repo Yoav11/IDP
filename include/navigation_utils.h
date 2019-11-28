@@ -18,3 +18,4 @@ void start_get_to_mine();
 void start_adjust_angle();
 void stop_adjust_angle();
 bool adjust_angle(float speed);
+int get_bearing();
