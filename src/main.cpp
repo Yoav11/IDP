@@ -19,6 +19,9 @@ bool got_to_mine = false;
 bool got_to_safe_zone = false;
 bool got_to_base = false;
 
+bool servo_lowered = false;
+float servo_time;
+
 int robot_bearing;
 
 void setup() {
@@ -76,11 +79,31 @@ void loop() {
             }
             break;
         case 6:
+            if (!servo_lowered) {
+              servo_time = millis();
+              move_servo(180);
+              servo_lowered = true;
+            }
+            if (millis() - servo_time > 1000 && servo_lowered) {
+              step++;
+            }
+            break;
+        case 7:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 7:
+        case 8:
+            if (servo_lowered) {
+              servo_time = millis();
+              move_servo(0);
+              servo_lowered = false;
+            }
+            if (millis() - servo_time > 1000 && !servo_lowered) {
+              step++;
+            }
+            break;
+        case 9:
             got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
@@ -88,12 +111,12 @@ void loop() {
                 start_move_to();
             }
             break;
-        case 8:
+        case 10:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 9:
+        case 11:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;

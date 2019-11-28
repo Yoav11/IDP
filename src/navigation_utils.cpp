@@ -342,9 +342,24 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
   return move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
 }
 
+int back_up_duration(int detected_d) {
+  if (detected_d < 10) {
+    return 1200;
+  } else if (detected_d < 20) {
+    return 800;
+  } else if (detected_d < 30) {
+    return 600;
+  } else if (detected_d < 40){
+    return 400;
+  } else {
+    return 200;
+  }
+}
+
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   if (!get_to_mine_is_on) {return;}
-  int duration = 1500; // ms
+  // int duration = 1500; // ms
+  int duration = back_up_duration(distance_up_north);
   switch (get_to_mine_phase) {
     case 0: // back up a bit
         move_forward(-speed);
@@ -363,13 +378,25 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       change_direction(bearing-90);
       get_to_mine_phase++;
       break;
-    case 2: // switch to "move up north"
-      if (!stopped_turning) {break;}
+    case 2:
+      if (stopped_turning) {
+        get_to_mine_phase++;
+        start_adjust_angle();
+      }
+      break;
+    case 3:
+      // if (!stopped_turning) {break;}
+      if (adjust_angle(1.0)) {
+        get_to_mine_phase++;
+      }
+      break;
+    case 4: // switch to "move up north"
+      // if (!stopped_turning) {break;}
       Serial.println("get_to_mine phase 2: switch to phase 3(the move up north)");
       get_to_mine_phase++;
       set_move_forward_till(true);
       break;
-    case 3: // move up north
+    case 5: // move up north
       if (stopped_turning) {break;}
       move_forward_till(distance_up_north, 1.0, false);
       if (!move_forward_till_on()) {
@@ -377,16 +404,16 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
         get_to_mine_phase++;
       }
       break;
-    case 4: // turn east
+    case 6: // turn east
       Serial.println("get_to_mine phase 4: turning east");
       change_direction(bearing+90);
       get_to_mine_phase++;
       break;
-    case 5:
+    case 7:
       if (!stopped_turning) {break;}
       get_to_mine_phase++;
       break;
-    case 6:
+    case 8:
       Serial.println("Got to the mine!");
       stop_get_to_mine();
       return true;
