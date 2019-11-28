@@ -24,7 +24,7 @@ void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
-    delay(4000);
+    delay(2000);
     ultrasound_setup();
     robot_bearing = get_bearing();
 }
@@ -35,7 +35,7 @@ void loop() {
 
     switch(step) {
         case 1:
-            motor_turn(1080);
+            change_direction(robot_bearing);
             robot_bearing = get_bearing();
             step++;
             break;
@@ -45,7 +45,6 @@ void loop() {
             set_move_forward_till(true);
             break;
         case 3:
-            delay(100000);
             if (temp_distance >= 0){
                 distance = temp_distance;
                 start_get_to_mine();
