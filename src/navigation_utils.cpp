@@ -420,7 +420,7 @@ bool adjust_angle(float speed) {
     return true;
   } else {
     set_move_forward_till(true);
-    move_forward_till(0, speed, false);
+    move_forward_till(-20, speed, false);
     Serial.println("moving");
     return false;
   }

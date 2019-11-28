@@ -29,27 +29,32 @@ void setup() {
     delay(2000);
     ultrasound_setup();
     robot_bearing = get_bearing();
+    start_adjust_angle();
 }
 
+
 void loop() {
-
-
-  /*
     stopped = stop_ticker();
     temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 
     switch(step) {
         case 1:
+            if (adjust_angle(1.0)) {
+              step++;
+              set_move_forward_till(true);
+            }
+            break;
+        case 2:
             change_direction(robot_bearing);
             robot_bearing = get_bearing();
             step++;
             break;
-        case 2:
+        case 3:
             if (!stopped) {break;}
             step++;
             set_move_forward_till(true);
             break;
-        case 3:
+        case 4:
             if (temp_distance >= 0){
                 distance = temp_distance;
                 start_get_to_mine();
@@ -62,7 +67,7 @@ void loop() {
                 step = 1;
             }
             break;
-        case 4:
+        case 5:
             got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
             if(got_to_mine) {
                 start_move_to();
@@ -70,12 +75,12 @@ void loop() {
                 step++;
             }
             break;
-        case 5:
+        case 6:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 6:
+        case 7:
             got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
@@ -83,19 +88,19 @@ void loop() {
                 start_move_to();
             }
             break;
-        case 7:
+        case 8:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 8:
+        case 9:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;
                  got_to_base = false;
                 robot_bearing = get_bearing();
+                start_adjust_angle();
             }
             break;
     }
-    */
 }
