@@ -22,6 +22,10 @@ bool get_to_mine_go_back_up_first = true;
 
 float current_time_mine = 0;
 
+bool adjusting_angle = false;
+bool adjusting_first_time = true;
+float adjust_start_time = 0;
+
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
   return move_forward_till_is_on;
@@ -388,4 +392,36 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       return true;
   }
   return false;
+}
+
+void start_adjust_angle() {
+  adjusting_angle = true;
+}
+
+void stop_adjust_angle() {
+  adjusting_angle = false;
+  motor_stop();
+}
+
+bool adjust_angle(float speed) {
+  if (!adjusting_angle) {return false;}
+
+  int distance = get_distance(trigPinBack, echoPinBack);
+
+  if (distance < 2 && adjusting_first_time) {
+    adjust_start_time = millis();
+    adjusting_first_time = false;
+  }
+
+  if (millis() - adjust_start_time > 3000 && !adjusting_first_time) {
+    stop_adjust_angle();
+    Serial.println("stopped adjusting");
+    adjusting_first_time = true;
+    return true;
+  } else {
+    set_move_forward_till(true);
+    move_forward_till(-20, speed, false);
+    Serial.println("moving");
+    return false;
+  }
 }

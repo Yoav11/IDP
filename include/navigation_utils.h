@@ -15,4 +15,7 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning);
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning);
 void start_move_to();
 void start_get_to_mine();
+void start_adjust_angle();
+void stop_adjust_angle();
+bool adjust_angle(float speed);
 int get_bearing();
