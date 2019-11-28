@@ -27,6 +27,10 @@ bool move_forward_till_on() {
   return move_forward_till_is_on;
 }
 
+int get_bearing() {
+    return bearing;
+}
+
 // Set value for whether move_forward_till function should be in use.
 void set_move_forward_till(bool on) {
   move_forward_till_is_on = on;
@@ -336,7 +340,7 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
 
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   if (!get_to_mine_is_on) {return;}
-  int duration = 500; // ms
+  int duration = 1500; // ms
   switch (get_to_mine_phase) {
     case 0: // back up a bit
         move_forward(-speed);
@@ -352,7 +356,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
         break;
     case 1: // turn north
       Serial.println("get_to_mine phase 1: turning north");
-      change_direction(0);
+      change_direction(bearing-90);
       get_to_mine_phase++;
       break;
     case 2: // switch to "move up north"
@@ -371,7 +375,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
       break;
     case 4: // turn east
       Serial.println("get_to_mine phase 4: turning east");
-      change_direction(90);
+      change_direction(bearing+90);
       get_to_mine_phase++;
       break;
     case 5:
