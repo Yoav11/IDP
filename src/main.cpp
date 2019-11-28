@@ -61,10 +61,10 @@ void loop() {
                 step++;
             }
             else if(move_forward_till_on()) {
-                move_forward_till(20, 0.3, true);
+                move_forward_till(17, 0.3, true);
             } else {
                 robot_bearing -= 90;
-                step = 1;
+                step = 2;
             }
             break;
         case 5:

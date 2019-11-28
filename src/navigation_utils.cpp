@@ -109,7 +109,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
 
 // Above 15cm, the speed is as specified when calling this function. Below 15cm, we switch to manual maneuvring.
   if (desired_d <= 100) { // If desired_d is small enough, go for the accurate control
-    if (abs(error) >= 15) {
+    if (abs(error) >= 20) {
       set_counts_for_move_forward_till(0);
       if (move_forward_till_phase_counts[0] >= n_checks) {
         speed_outOf_255 = convert_to_speed_outOf_255(speed);
@@ -335,11 +335,11 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
 }
 
 bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
-  return move_to(10, 200, speed, horizontal_first, stopped_turning, 0);
+  return move_to(20, 190, speed, horizontal_first, stopped_turning, 0);
 }
 
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
-  return move_to(10, 20, speed, horizontal_first, stopped_turning, 90);
+  return move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
 }
 
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
