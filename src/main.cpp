@@ -3,6 +3,7 @@
 #include <led_utils.h>
 #include <navigation_utils.h>
 #include <ultrasound_utils.h>
+#include <servo_utils.h>
 
 int old_routine_step;
 bool stopped = true;
@@ -22,12 +23,17 @@ void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
+    servo_setup();
     delay(2000);
     ultrasound_setup();
-    start_get_to_mine();
+    // start_get_to_mine();
+    // start_adjust_angle();
 }
 
 void loop() {
+
+
+  /*
     stopped = stop_ticker();
     temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 
@@ -76,4 +82,5 @@ void loop() {
             }
             break;
     }
+    */
 }
