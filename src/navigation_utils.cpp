@@ -341,9 +341,6 @@ bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
 }
 
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
-<<<<<<< HEAD
-  return move_to(25, 25, speed, horizontal_first, stopped_turning, 90);
-=======
   // if (!move_to_is_on) {return false;}
   // if (first_base && move_to(20, 25, speed, horizontal_first, stopped_turning, 90)) {
   //   first_base = false;
@@ -357,7 +354,6 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
   // return false;
 
   return move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
->>>>>>> 935684a9de8a2c1f2697894354424c79ab3b2bb4
 }
 
 int back_up_duration(int detected_d) {
@@ -453,11 +449,7 @@ bool adjust_angle(float speed) {
 
   int distance = get_distance(trigPinBack, echoPinBack);
 
-<<<<<<< HEAD
-  if (distance < 3 && adjusting_first_time) {
-=======
   if (distance < 5 && adjusting_first_time) {
->>>>>>> 935684a9de8a2c1f2697894354424c79ab3b2bb4
     adjust_start_time = millis();
     adjusting_first_time = false;
   }
