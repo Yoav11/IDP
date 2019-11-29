@@ -41,6 +41,14 @@ void setup() {
 
 
 void loop() {
+
+    // Serial.print("front");
+    // test_distance_sensor(trigPinFront, echoPinFront, 2);
+    // Serial.print("back");
+    // test_distance_sensor(trigPinBack, echoPinBack, 2);
+    // Serial.print("left");
+    // test_distance_sensor(trigPinLeft, echoPinLeft, 2);
+    
     stopped = stop_ticker();
     temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 

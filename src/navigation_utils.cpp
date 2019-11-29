@@ -26,6 +26,8 @@ bool adjusting_angle = false;
 bool adjusting_first_time = true;
 float adjust_start_time = 0;
 
+bool first_base = false;
+
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
   return move_forward_till_is_on;
@@ -249,7 +251,7 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
   switch (move_to_phase) {
     case 0:
       Serial.println("move_to phase 0: face first wall");
-      change_direction(horizontal_first ? 90 : 180);
+      change_direction(horizontal_first ? 90 : 0);
       move_to_phase++;
       break;
     case 1:
@@ -271,9 +273,9 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
         }
       } else {
         if (y > (240-robot_length)/2) {
-          move_forward_till(240 - robot_length - y, 1.0, false);
+          move_forward_till(240 - robot_length - y, 1.0, true);
         } else {
-          move_forward_till(y, 1.0, true);
+          move_forward_till(y, 1.0, false);
         }
       }
 
@@ -284,7 +286,7 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       break;
     case 3: // Face second wall
       Serial.println("move_to phase 3: face second wall");
-      change_direction(horizontal_first ? 180 : 90);
+      change_direction(horizontal_first ? 0 : 90);
       move_to_phase++;
       break;
     case 4: // Change the mode to moving to the west wall phase
@@ -300,9 +302,9 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       Serial.println("go_to_safe_zone phase 2: go to north wall");
       if (horizontal_first) { // hence vertical this time
         if (y > (240-robot_length)/2) { // y is quite big, then use the back sensor
-          move_forward_till(240 - robot_length - y, 1.0, false);
+          move_forward_till(240 - robot_length - y, 1.0, true);
         } else { // if y is small, then use the front sensor
-          move_forward_till(y, 1.0, true);
+          move_forward_till(y, 1.0, false);
         }
       } else { // hence horizontal this time
         if (x > (240-robot_length)/2) { // x is quite big, then use the back sensor
@@ -339,7 +341,23 @@ bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
 }
 
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
+<<<<<<< HEAD
   return move_to(25, 25, speed, horizontal_first, stopped_turning, 90);
+=======
+  // if (!move_to_is_on) {return false;}
+  // if (first_base && move_to(20, 25, speed, horizontal_first, stopped_turning, 90)) {
+  //   first_base = false;
+  // } else {
+  //   bool reached = move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
+  //   if (reached) {
+  //     first_base = true;
+  //   }
+  //   return reached;
+  // }
+  // return false;
+
+  return move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
+>>>>>>> 935684a9de8a2c1f2697894354424c79ab3b2bb4
 }
 
 int back_up_duration(int detected_d) {
@@ -435,7 +453,11 @@ bool adjust_angle(float speed) {
 
   int distance = get_distance(trigPinBack, echoPinBack);
 
+<<<<<<< HEAD
   if (distance < 3 && adjusting_first_time) {
+=======
+  if (distance < 5 && adjusting_first_time) {
+>>>>>>> 935684a9de8a2c1f2697894354424c79ab3b2bb4
     adjust_start_time = millis();
     adjusting_first_time = false;
   }
