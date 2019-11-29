@@ -3,6 +3,7 @@
 #include <led_utils.h>
 #include <navigation_utils.h>
 #include <ultrasound_utils.h>
+#include <servo_utils.h>
 
 int old_routine_step;
 bool stopped = true;
@@ -19,6 +20,8 @@ bool got_to_safe_zone = false;
 bool got_to_base = false;
 
 bool gripper_closed;
+bool servo_lowered = false;
+float servo_time;
 
 int robot_bearing;
 
@@ -26,10 +29,13 @@ void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
     motor_begin();
+    servo_setup();
     delay(2000);
     ultrasound_setup();
     robot_bearing = get_bearing();
+    start_adjust_angle();
 }
+
 
 void loop() {
     stopped = stop_ticker();
@@ -37,26 +43,32 @@ void loop() {
 
     switch(step) {
         case 1:
+            if (adjust_angle(1.0)) {
+              step++;
+              set_move_forward_till(true);
+            }
+            break;
+        case 2:
             change_direction(robot_bearing);
             robot_bearing = get_bearing();
             step++;
             break;
-        case 2:
+        case 3:
             if (!stopped) {break;}
             step++;
             set_move_forward_till(true);
             break;
-        case 3:
+        case 4:
             if (temp_distance >= 0){
                 distance = temp_distance;
                 start_get_to_mine();
                 step++;
             }
             else if(move_forward_till_on()) {
-                move_forward_till(20, 0.3, true);
+                move_forward_till(17, 0.3, true);
             } else {
                 robot_bearing -= 90;
-                step = 1;
+                step = 2;
             }
             break;
         case 4:
@@ -72,13 +84,14 @@ void loop() {
             if(gripper_closed) {
                 step++;
             }
-            break;
         case 6:
-            got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
-            if(got_to_safe_zone) {
-                got_to_safe_zone = false;
-                step++;
-                start_move_to();
+            if (!servo_lowered) {
+              servo_time = millis();
+              move_servo(180);
+              servo_lowered = true;
+            }
+            if (millis() - servo_time > 1000 && servo_lowered) {
+              step++;
             }
             break;
         case 7:
@@ -87,11 +100,35 @@ void loop() {
             step++;
             break;
         case 8:
+            if (servo_lowered) {
+              servo_time = millis();
+              move_servo(0);
+              servo_lowered = false;
+            }
+            if (millis() - servo_time > 1000 && !servo_lowered) {
+              step++;
+            }
+            break;
+        case 9:
+            got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
+            if(got_to_safe_zone) {
+                got_to_safe_zone = false;
+                step++;
+                start_move_to();
+            }
+            break;
+        case 10:
+            // gripper time
+            delay(1000);
+            step++;
+            break;
+        case 11:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;
                  got_to_base = false;
                 robot_bearing = get_bearing();
+                start_adjust_angle();
             }
             break;
     }
