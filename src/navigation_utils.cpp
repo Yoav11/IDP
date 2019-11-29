@@ -435,7 +435,7 @@ bool adjust_angle(float speed) {
 
   int distance = get_distance(trigPinBack, echoPinBack);
 
-  if (distance < 2 && adjusting_first_time) {
+  if (distance < 5 && adjusting_first_time) {
     adjust_start_time = millis();
     adjusting_first_time = false;
   }
