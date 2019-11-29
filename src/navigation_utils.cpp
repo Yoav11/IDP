@@ -249,7 +249,7 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
   switch (move_to_phase) {
     case 0:
       Serial.println("move_to phase 0: face first wall");
-      change_direction(horizontal_first ? 270 : 180);
+      change_direction(horizontal_first ? 90 : 180);
       move_to_phase++;
       break;
     case 1:
@@ -265,9 +265,9 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       // Serial.println("move_to phase 2: go to first wall");
       if (horizontal_first) {
         if (x > (240-robot_length)/2) {
-          move_forward_till(240 - robot_length - x, 1.0, false);
+          move_forward_till(240 - robot_length - x, 1.0, true);
         } else {
-          move_forward_till(x, 1.0, true);
+          move_forward_till(x, 1.0, false);
         }
       } else {
         if (y > (240-robot_length)/2) {
@@ -284,7 +284,7 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
       break;
     case 3: // Face second wall
       Serial.println("move_to phase 3: face second wall");
-      change_direction(horizontal_first ? 180 : 270);
+      change_direction(horizontal_first ? 180 : 90);
       move_to_phase++;
       break;
     case 4: // Change the mode to moving to the west wall phase
@@ -306,9 +306,9 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
         }
       } else { // hence horizontal this time
         if (x > (240-robot_length)/2) { // x is quite big, then use the back sensor
-          move_forward_till(240 - robot_length - x, 1.0, false);
+          move_forward_till(240 - robot_length - x, 1.0, true);
         } else { // if y is small, then use the front sensor
-          move_forward_till(x, 1.0, true);
+          move_forward_till(x, 1.0, false);
         }
       }
 
