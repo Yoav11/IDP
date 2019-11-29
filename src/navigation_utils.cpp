@@ -339,7 +339,7 @@ bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
 }
 
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
-  return move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
+  return move_to(25, 25, speed, horizontal_first, stopped_turning, 90);
 }
 
 int back_up_duration(int detected_d) {
