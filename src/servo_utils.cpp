@@ -8,7 +8,7 @@ void servo_setup() {
 }
 
 // Moves the servo. angle is between and including 20 and 168
-// 20 is up, 180 is down
+// 20 is up, 168 is down
 void move_servo(int angle) {
   int actual_angle = angle;
 
@@ -26,4 +26,12 @@ void move_servo(int angle) {
   }
 
   myservo.write(actual_angle);
+}
+
+void raise_servo() {
+  move_servo(0);
+}
+
+void lower_servo() {
+  move_servo(180);
 }

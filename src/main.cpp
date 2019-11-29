@@ -24,6 +24,9 @@ float servo_time;
 
 int robot_bearing;
 
+bool first_mine = true;
+int first_mine_step = 0;
+
 void setup() {
     // pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(9600);
@@ -40,11 +43,37 @@ void loop() {
     stopped = stop_ticker();
     temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 
+    if (first_mine) {
+      switch (first_mine_step) {
+        case 0:
+          if (adjust_angle(1.0)) {
+            first_mine_step++;
+            set_move_forward_till(true);
+          }
+          break;
+        case 1:
+          move_forward_till(20, 0.5, false);
+          if (!move_forward_till_on()) {
+            first_mine_step++;
+            start_move_to();
+          }
+          break;
+        case 2:
+          if (move_to(15, 100, 1.0, false, stopped, 90)) {
+            first_mine_step++;
+            step = 6;
+            first_mine = false;
+          }
+          break;
+      }
+      return;
+    }
+
     switch(step) {
         case 1:
             if (adjust_angle(1.0)) {
               step++;
-              set_move_forward_till(true);
+              // set_move_forward_till(true);
             }
             break;
         case 2:
@@ -73,7 +102,7 @@ void loop() {
         case 5:
             got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
             if(got_to_mine) {
-                start_move_to();
+                // start_move_to();
                 got_to_mine = false;
                 step++;
             }
@@ -81,7 +110,7 @@ void loop() {
         case 6:
             if (!servo_lowered) {
               servo_time = millis();
-              move_servo(180);
+              lower_servo();
               servo_lowered = true;
             }
             if (millis() - servo_time > 1000 && servo_lowered) {
@@ -96,11 +125,12 @@ void loop() {
         case 8:
             if (servo_lowered) {
               servo_time = millis();
-              move_servo(0);
+              raise_servo();
               servo_lowered = false;
             }
             if (millis() - servo_time > 1000 && !servo_lowered) {
               step++;
+              start_move_to();
             }
             break;
         case 9:
