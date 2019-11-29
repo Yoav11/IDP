@@ -71,7 +71,7 @@ void loop() {
                 step = 2;
             }
             break;
-        case 4:
+        case 5:
             got_to_mine = get_to_mine(distance + 30, 0.5, stopped);
             if(got_to_mine) {
                 start_move_to();
@@ -79,12 +79,12 @@ void loop() {
                 step++;
             }
             break;
-        case 5:
+        case 6:
             gripper_closed = close_gripper();
             if(gripper_closed) {
                 step++;
             }
-        case 6:
+        case 7:
             if (!servo_lowered) {
               servo_time = millis();
               move_servo(180);
@@ -94,12 +94,12 @@ void loop() {
               step++;
             }
             break;
-        case 7:
+        case 8:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 8:
+        case 9:
             if (servo_lowered) {
               servo_time = millis();
               move_servo(0);
@@ -109,7 +109,7 @@ void loop() {
               step++;
             }
             break;
-        case 9:
+        case 10:
             got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
@@ -117,12 +117,12 @@ void loop() {
                 start_move_to();
             }
             break;
-        case 10:
+        case 11:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 11:
+        case 12:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;

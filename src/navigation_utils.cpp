@@ -344,15 +344,15 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
 
 int back_up_duration(int detected_d) {
   if (detected_d < 10) {
-    return 1200;
+    return 2000;
   } else if (detected_d < 20) {
-    return 800;
+    return 1600;
   } else if (detected_d < 30) {
-    return 600;
+    return 1400;
   } else if (detected_d < 40){
-    return 400;
+    return 1200;
   } else {
-    return 200;
+    return 1000;
   }
 }
 
@@ -435,12 +435,12 @@ bool adjust_angle(float speed) {
 
   int distance = get_distance(trigPinBack, echoPinBack);
 
-  if (distance < 2 && adjusting_first_time) {
+  if (distance < 3 && adjusting_first_time) {
     adjust_start_time = millis();
     adjusting_first_time = false;
   }
 
-  if (millis() - adjust_start_time > 3000 && !adjusting_first_time) {
+  if (millis() - adjust_start_time > 1000 && !adjusting_first_time) {
     stop_adjust_angle();
     Serial.println("stopped adjusting");
     adjusting_first_time = true;
