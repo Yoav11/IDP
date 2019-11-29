@@ -19,6 +19,7 @@ bool got_to_mine = false;
 bool got_to_safe_zone = false;
 bool got_to_base = false;
 
+bool gripper_closed;
 bool servo_lowered = false;
 float servo_time;
 
@@ -108,7 +109,7 @@ void loop() {
             }
             break;
         case 5:
-            got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
+            got_to_mine = get_to_mine(distance + 30, 0.5, stopped);
             if(got_to_mine) {
                 // start_move_to();
                 got_to_mine = false;
@@ -116,6 +117,11 @@ void loop() {
             }
             break;
         case 6:
+            gripper_closed = close_gripper();
+            if(gripper_closed) {
+                step++;
+            }
+        case 7:
             if (!servo_lowered) {
               servo_time = millis();
               lower_servo();
@@ -125,12 +131,12 @@ void loop() {
               step++;
             }
             break;
-        case 7:
+        case 8:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 8:
+        case 9:
             if (servo_lowered) {
               servo_time = millis();
               raise_servo();
@@ -141,7 +147,7 @@ void loop() {
               start_move_to();
             }
             break;
-        case 9:
+        case 10:
             got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
@@ -149,12 +155,12 @@ void loop() {
                 start_move_to();
             }
             break;
-        case 10:
+        case 11:
             // gripper time
             delay(1000);
             step++;
             break;
-        case 11:
+        case 12:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;

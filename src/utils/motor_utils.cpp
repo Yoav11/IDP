@@ -4,12 +4,15 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
 Adafruit_DCMotor *left_motor = AFMS.getMotor(1);
 Adafruit_DCMotor *right_motor = AFMS.getMotor(2);
+Adafruit_DCMotor *gripper_motor = AFMS.getMotor(3);
 bool has_to_stop = false;
 float time_to_stop = -1;
 float stop_tick;
 int routine_step = -1;
 uint16_t old_speeds[2] = {0, 0}; // Stores last speed for each motor
 uint16_t old_direcs[2] = {FORWARD, BACKWARD}; // Stores last moving direction for each motor
+
+float close_gripper_timer = 0;
 
 void motor_begin() {
     AFMS.begin();
@@ -107,6 +110,17 @@ void square_test() {
             time_to_stop = 6000;
             Serial.println(routine_step);
             break;
+        }
     }
 
-}
+    bool close_gripper() {
+        if(close_gripper_timer == 0) {
+            gripper_motor->setSpeed(100);
+            gripper_motor->run(FORWARD);
+            close_gripper_timer = millis();
+        } else if(millis() - close_gripper_timer > 1000) {
+            gripper_motor->setSpeed(0);
+            return true;
+        }
+        return false;
+    }
