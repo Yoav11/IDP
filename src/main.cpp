@@ -18,6 +18,8 @@ bool got_to_mine = false;
 bool got_to_safe_zone = false;
 bool got_to_base = false;
 
+bool gripper_closed;
+
 int robot_bearing;
 
 void setup() {
@@ -58,7 +60,7 @@ void loop() {
             }
             break;
         case 4:
-            got_to_mine = get_to_mine(distance + 20, 0.5, stopped);
+            got_to_mine = get_to_mine(distance + 30, 0.5, stopped);
             if(got_to_mine) {
                 start_move_to();
                 got_to_mine = false;
@@ -66,9 +68,10 @@ void loop() {
             }
             break;
         case 5:
-            // gripper time
-            delay(1000);
-            step++;
+            gripper_closed = close_gripper();
+            if(gripper_closed) {
+                step++;
+            }
             break;
         case 6:
             got_to_safe_zone = go_to_safe_zone(1.0, true, stopped);
