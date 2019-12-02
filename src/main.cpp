@@ -15,6 +15,8 @@ float current_time;
 float distance;
 float temp_distance;
 
+int global_timer = 0;
+
 bool got_to_mine = false;
 bool got_to_safe_zone = false;
 bool got_to_base = false;
@@ -48,7 +50,7 @@ void loop() {
     // test_distance_sensor(trigPinBack, echoPinBack, 2);
     // Serial.print("left");
     // test_distance_sensor(trigPinLeft, echoPinLeft, 2);
-    
+
     stopped = stop_ticker();
     temp_distance = detected_mine(trigPinLeft, echoPinLeft);
 
@@ -68,7 +70,7 @@ void loop() {
           }
           break;
         case 2:
-          if (move_to(15, 100, 1.0, false, stopped, 90)) {
+          if (move_to(30, 108 , 1.0, false, stopped, 90)) {
             first_mine_step++;
             step = 6;
             first_mine = false;
@@ -117,11 +119,6 @@ void loop() {
             }
             break;
         case 6:
-            gripper_closed = close_gripper();
-            if(gripper_closed) {
-                step++;
-            }
-        case 7:
             if (!servo_lowered) {
               servo_time = millis();
               lower_servo();
@@ -131,10 +128,19 @@ void loop() {
               step++;
             }
             break;
+        case 7:
+            gripper_closed = close_gripper(true);
+            if(gripper_closed) {
+                step++;
+                gripper_closed = false;
+            }
+            break;
         case 8:
-            // gripper time
-            delay(1000);
-            step++;
+            gripper_closed = close_gripper(false);
+            if(gripper_closed) {
+                step++;
+                gripper_closed = false;
+            }
             break;
         case 9:
             if (servo_lowered) {
@@ -156,7 +162,6 @@ void loop() {
             }
             break;
         case 11:
-            // gripper time
             delay(1000);
             step++;
             break;
@@ -167,6 +172,10 @@ void loop() {
                  got_to_base = false;
                 robot_bearing = get_bearing();
                 start_adjust_angle();
+            }
+            global_timer++;
+            if(global_timer >= 2) {
+                while(1) {}
             }
             break;
     }

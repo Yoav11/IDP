@@ -11,4 +11,4 @@ void motor_stop();
 void motor_turn(float angle);
 bool stop_ticker();
 void square_test();
-bool close_gripper();
+bool close_gripper(bool close);
