@@ -4,6 +4,7 @@
 #include <navigation_utils.h>
 #include <ultrasound_utils.h>
 #include <servo_utils.h>
+#include <Ticker.h>
 
 int old_routine_step;
 bool stopped = true;
@@ -30,8 +31,11 @@ int robot_bearing;
 bool first_mine = true;
 int first_mine_step = 0;
 
+Ticker amber_led(blink_builtin, 500);
+
 void setup() {
-    // pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
+    amber_led.start();
     Serial.begin(9600);
     motor_begin();
     servo_setup();
@@ -50,6 +54,8 @@ void loop() {
     // test_distance_sensor(trigPinBack, echoPinBack, 2);
     // Serial.print("left");
     // test_distance_sensor(trigPinLeft, echoPinLeft, 2);
+
+    amber_led.update();
 
     stopped = stop_ticker();
     temp_distance = detected_mine(trigPinLeft, echoPinLeft);
