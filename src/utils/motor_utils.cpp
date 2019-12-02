@@ -39,11 +39,11 @@ void motor_stop() {
 
 void motor_turn(float angle) {
     if(angle >= 0){
-        time_to_stop = map(angle, 0, 360, 0, 12250);
+        time_to_stop = map(angle, 0, 360, 0, 12000);
         motor_run(1, 100, FORWARD);
         motor_run(2, 100, FORWARD);
     } else {
-        time_to_stop = map(angle, -360, 0, 12250, 0);
+        time_to_stop = map(angle, -360, 0, 12000, 0);
         motor_run(1, 100, BACKWARD);
         motor_run(2, 100, BACKWARD);
     }
@@ -113,13 +113,18 @@ void square_test() {
         }
     }
 
-    bool close_gripper() {
+    bool close_gripper(bool close) {
         if(close_gripper_timer == 0) {
-            gripper_motor->setSpeed(100);
-            gripper_motor->run(FORWARD);
+            gripper_motor->setSpeed(150);
+            if(close == true){
+                gripper_motor->run(FORWARD);
+            } else {
+                gripper_motor->run(BACKWARD);
+            }
             close_gripper_timer = millis();
-        } else if(millis() - close_gripper_timer > 1000) {
+        } else if(millis() - close_gripper_timer > 2500) {
             gripper_motor->setSpeed(0);
+            close_gripper_timer = 0;
             return true;
         }
         return false;
