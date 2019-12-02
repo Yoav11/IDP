@@ -172,10 +172,10 @@ void loop() {
                  got_to_base = false;
                 robot_bearing = get_bearing();
                 start_adjust_angle();
-            }
-            global_timer++;
-            if(global_timer >= 2) {
-                while(1) {}
+                global_timer++;
+                if(global_timer >= 2) {
+                    while(1) {}
+                }
             }
             break;
     }
