@@ -69,14 +69,14 @@ void loop() {
           }
           break;
         case 1:
-          move_forward_till(20, 0.5, false);
+          move_forward_till(25, 0.5, false);
           if (!move_forward_till_on()) {
             first_mine_step++;
             start_move_to();
           }
           break;
         case 2:
-          if (move_to(30, 108 , 1.0, false, stopped, 90)) {
+          if (move_to(30, 106, 1.0, false, stopped, 90)) {
             first_mine_step++;
             step = 6;
             first_mine = false;
@@ -125,12 +125,7 @@ void loop() {
             }
             break;
         case 6:
-            if (!servo_lowered) {
-              servo_time = millis();
-              lower_servo();
-              servo_lowered = true;
-            }
-            if (millis() - servo_time > 1000 && servo_lowered) {
+            if (lower_servo()) {
               step++;
             }
             break;
@@ -149,12 +144,7 @@ void loop() {
             }
             break;
         case 9:
-            if (servo_lowered) {
-              servo_time = millis();
-              raise_servo();
-              servo_lowered = false;
-            }
-            if (millis() - servo_time > 1000 && !servo_lowered) {
+            if (raise_servo()) {
               step++;
               start_move_to();
             }

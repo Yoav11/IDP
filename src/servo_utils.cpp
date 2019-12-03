@@ -2,6 +2,9 @@
 
 Servo myservo;
 
+float servo_timer;
+bool servo_first = true;
+
 void servo_setup() {
   myservo.attach(servo_pin);
   move_servo(0);
@@ -28,10 +31,30 @@ void move_servo(int angle) {
   myservo.write(actual_angle);
 }
 
-void raise_servo() {
-  move_servo(0);
+bool raise_servo() {
+  if (servo_first) {
+    move_servo(0);
+    servo_timer = millis();
+    servo_first = false;
+  }
+
+  if (millis() - servo_timer > 2000) {
+    servo_first = true;
+    return true;
+  }
+  return false;
 }
 
-void lower_servo() {
-  move_servo(180);
+bool lower_servo() {
+  if (servo_first) {
+    move_servo(180);
+    servo_timer = millis();
+    servo_first = false;
+  }
+
+  if (millis() - servo_timer > 2000) {
+    servo_first = true;
+    return true;
+  }
+  return false;
 }
