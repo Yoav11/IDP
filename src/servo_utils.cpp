@@ -2,8 +2,12 @@
 
 Servo myservo;
 
-float servo_timer;
-bool servo_first = true;
+float move_servo_timer;
+float raise_servo_timer;
+float lower_servo_timer;
+bool move_servo_first = true;
+bool raise_servo_first = true;
+bool lower_servo_first = true;
 
 void servo_setup() {
   myservo.attach(servo_pin);
@@ -12,7 +16,7 @@ void servo_setup() {
 
 // Moves the servo. angle is between and including 20 and 168
 // 20 is up, 168 is down
-void move_servo(int angle) {
+bool move_servo(int angle) {
   int actual_angle = angle;
 
   while (actual_angle < 0) {
@@ -28,32 +32,44 @@ void move_servo(int angle) {
     actual_angle =  165;
   }
 
-  myservo.write(actual_angle);
+  if (move_servo_first) {
+    move_servo(actual_angle);
+    move_servo_timer = millis();
+    move_servo_first = false;
+  }
+
+  if (millis() - raise_servo_timer > 2000) {
+    move_servo_first = true;
+    return true;
+  }
+  return false;
+
+  // myservo.write(actual_angle);
 }
 
 bool raise_servo() {
-  if (servo_first) {
+  if (raise_servo_first) {
     move_servo(0);
-    servo_timer = millis();
-    servo_first = false;
+    raise_servo_timer = millis();
+    raise_servo_first = false;
   }
 
-  if (millis() - servo_timer > 2000) {
-    servo_first = true;
+  if (millis() - raise_servo_timer > 2000) {
+    raise_servo_first = true;
     return true;
   }
   return false;
 }
 
 bool lower_servo() {
-  if (servo_first) {
+  if (lower_servo_first) {
     move_servo(180);
-    servo_timer = millis();
-    servo_first = false;
+    lower_servo_timer = millis();
+    lower_servo_first = false;
   }
 
-  if (millis() - servo_timer > 2000) {
-    servo_first = true;
+  if (millis() - lower_servo_timer > 2000) {
+    lower_servo_first = true;
     return true;
   }
   return false;

@@ -4,6 +4,6 @@
 const int servo_pin = 6;
 
 void servo_setup();
-void move_servo(int angle);
+bool move_servo(int angle);
 bool raise_servo();
 bool lower_servo();
