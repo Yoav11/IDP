@@ -4,12 +4,15 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
 Adafruit_DCMotor *left_motor = AFMS.getMotor(1);
 Adafruit_DCMotor *right_motor = AFMS.getMotor(2);
+Adafruit_DCMotor *gripper_motor = AFMS.getMotor(3);
 bool has_to_stop = false;
 float time_to_stop = -1;
 float stop_tick;
 int routine_step = -1;
 uint16_t old_speeds[2] = {0, 0}; // Stores last speed for each motor
 uint16_t old_direcs[2] = {FORWARD, BACKWARD}; // Stores last moving direction for each motor
+
+float close_gripper_timer = 0;
 
 void motor_begin() {
     AFMS.begin();
@@ -36,11 +39,11 @@ void motor_stop() {
 
 void motor_turn(float angle) {
     if(angle >= 0){
-        time_to_stop = map(angle, 0, 360, 0, 12250);
+        time_to_stop = map(angle, 0, 360, 0, 12000);
         motor_run(1, 100, FORWARD);
         motor_run(2, 100, FORWARD);
     } else {
-        time_to_stop = map(angle, -360, 0, 12250, 0);
+        time_to_stop = map(angle, -360, 0, 12000, 0);
         motor_run(1, 100, BACKWARD);
         motor_run(2, 100, BACKWARD);
     }
@@ -107,6 +110,22 @@ void square_test() {
             time_to_stop = 6000;
             Serial.println(routine_step);
             break;
+        }
     }
 
-}
+    bool close_gripper(bool close) {
+        if(close_gripper_timer == 0) {
+            gripper_motor->setSpeed(150);
+            if(close == true){
+                gripper_motor->run(FORWARD);
+            } else {
+                gripper_motor->run(BACKWARD);
+            }
+            close_gripper_timer = millis();
+        } else if(millis() - close_gripper_timer > 2500) {
+            gripper_motor->setSpeed(0);
+            close_gripper_timer = 0;
+            return true;
+        }
+        return false;
+    }

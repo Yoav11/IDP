@@ -11,6 +11,7 @@ void return_to_base(bool stopped);
 int detected_mine(int trigPinLeft, int echoPinLeft);
 bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_turning, int final_bearing);
 bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning);
+void start_return();
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning);
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning);
 void start_move_to();
