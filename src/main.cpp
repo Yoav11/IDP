@@ -208,13 +208,19 @@ void loop() {
             }
             break;
         case 12:
-            if (close_gripper(false)) {
-              Serial.println("opened");
-              step++;
-              start_return();
+            if (lower_servo()) {
+              if (close_gripper(false)) {
+                Serial.println("opened");
+                step++;
+              }
             }
             break;
         case 13:
+            if (raise_servo()) {
+              step++;
+              start_return();
+            }
+        case 14:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;
