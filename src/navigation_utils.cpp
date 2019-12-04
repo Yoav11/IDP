@@ -27,6 +27,7 @@ bool adjusting_first_time = true;
 float adjust_start_time = 0;
 
 bool first_base = false;
+int base_phase = 0;
 
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
@@ -107,6 +108,8 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   const int n_checks = 6;
   const int n_stop_checks = 2;
 
+  if (distance == 0) {return;}
+
   uint16_t speed_outOf_255;
 
 // Above 15cm, the speed is as specified when calling this function. Below 15cm, we switch to manual maneuvring.
@@ -136,14 +139,14 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
       set_counts_for_move_forward_till(3);
       if (move_forward_till_phase_counts[3] >= n_checks/2) {
         speed_outOf_255 = convert_to_speed_outOf_255(0.2);
-        Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
+        // Serial.print("Phase 3: Robot pretty close to the desired distance. Error: ");
         Serial.println(error);
       }
     } else if (abs(error) >  0) {
       set_counts_for_move_forward_till(4);
       if (move_forward_till_phase_counts[4] >= n_checks/2) {
         speed_outOf_255 = convert_to_speed_outOf_255(0.15);
-        Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
+        // Serial.print("Phase 4: Robot very close to the desired distance. Error: ");
         Serial.println(error);
       }
     } else {
@@ -154,7 +157,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
       if (move_forward_till_phase_counts[5] >= n_stop_checks+1) {
         move_forward_till_is_on = false;
         set_counts_for_move_forward_till_to_zero();
-        Serial.println("Phase 5: Robot stopping since we reached the desired distance");
+        // Serial.println("Phase 5: Robot stopping since we reached the desired distance");
       }
     }
   } else { // if desired_d is big, choose the control with a slightly bigger error (~3cm)
@@ -181,7 +184,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
       if (move_forward_till_phase_counts[3] >= n_stop_checks+1) {
         move_forward_till_is_on = false;
         set_counts_for_move_forward_till_to_zero();
-        Serial.println("move_forward_till manual maneuvering phase 2: Robot stopping since we reached a close enough distance");
+        // Serial.println("move_forward_till manual maneuvering phase 2: Robot stopping since we reached a close enough distance");
       }
     }
   }
@@ -229,6 +232,7 @@ void change_direction(int final_bearing) {
 // This function returns a positive number if a mine is detected (in cm), and a negative number if not detected. Call it in the loop function.
 int detected_mine(int trigPinLeft, int echoPinLeft) {
   int distance = get_distance(trigPinLeft, echoPinLeft);
+  if (distance == 0) {return -3;}
   if (distance < 80) {
     good_distances[good_distance_count] = distance;
     good_distance_count++;
@@ -299,7 +303,7 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
     case 5:
       if (stopped_turning) {break;}
 
-      Serial.println("go_to_safe_zone phase 2: go to north wall");
+      // Serial.println("go_to_safe_zone phase 2: go to north wall");
       if (horizontal_first) { // hence vertical this time
         if (y > (240-robot_length)/2) { // y is quite big, then use the back sensor
           move_forward_till(240 - robot_length - y, 1.0, true);
@@ -337,23 +341,40 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
 }
 
 bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
-  return move_to(30, 200, speed, horizontal_first, stopped_turning, 0);
+  return move_to(30, 200, speed, horizontal_first, stopped_turning, 315);
+}
+
+void start_return() {
+  start_move_to();
+  base_phase = 0;
 }
 
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
-  // if (!move_to_is_on) {return false;}
-  // if (first_base && move_to(20, 25, speed, horizontal_first, stopped_turning, 90)) {
-  //   first_base = false;
-  // } else {
-  //   bool reached = move_to(20, 25, speed, horizontal_first, stopped_turning, 90);
-  //   if (reached) {
-  //     first_base = true;
-  //   }
-  //   return reached;
-  // }
-  // return false;
+  switch (base_phase) {
+    case 0:
+      if (move_to(25, 30, speed, horizontal_first, stopped_turning, 90)) {
+        base_phase++;
+        start_adjust_angle();
+        Serial.println("first base!");
+      }
+      break;
+    case 1:
+      if (adjust_angle(1.0)) {
+        base_phase++;
+        start_move_to();
+        Serial.println("adjusted angle");
+      }
+      break;
+    case 2:
+      if (move_to(25, 25, speed, horizontal_first, stopped_turning, 90)) {
+        return true;
+        Serial.println("second base!");
+      }
+      break;
+  }
+  return false;
 
-  return move_to(30, 25, speed, horizontal_first, stopped_turning, 90);
+  // return move_to(30, 25, speed, horizontal_first, stopped_turning, 90);
 }
 
 int back_up_duration(int detected_d) {
@@ -437,6 +458,7 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
 
 void start_adjust_angle() {
   adjusting_angle = true;
+  adjusting_first_time = true;
 }
 
 void stop_adjust_angle() {
@@ -448,6 +470,7 @@ bool adjust_angle(float speed) {
   if (!adjusting_angle) {return false;}
 
   int distance = get_distance(trigPinBack, echoPinBack);
+  if (distance == 0) {return false;}
 
   if (distance < 5 && adjusting_first_time) {
     adjust_start_time = millis();
@@ -457,12 +480,10 @@ bool adjust_angle(float speed) {
   if (millis() - adjust_start_time > 1000 && !adjusting_first_time) {
     stop_adjust_angle();
     Serial.println("stopped adjusting");
-    adjusting_first_time = true;
     return true;
   } else {
     set_move_forward_till(true);
     move_forward_till(-20, speed, false);
-    Serial.println("moving");
     return false;
   }
 }

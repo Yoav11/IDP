@@ -1,11 +1,11 @@
 #include "Arduino.h"
 
-const int trigPinFront = 8;
-const int echoPinFront = 9;
+const int trigPinFront = 2;
+const int echoPinFront = 3;
 const int trigPinLeft = 10;
 const int echoPinLeft = 11;
-const int trigPinBack = 0;
-const int echoPinBack = 1;
+const int trigPinBack = 4;
+const int echoPinBack = 5;
 
 void ultrasound_setup();
 int get_distance(int trigPin, int echoPin);

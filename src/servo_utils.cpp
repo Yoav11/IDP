@@ -24,8 +24,8 @@ void move_servo(int angle) {
 
   if (actual_angle < 20) {
     actual_angle = 20;
-  } else if (actual_angle > 168) {
-    actual_angle =  168;
+  } else if (actual_angle > 165) {
+    actual_angle =  165;
   }
 
   myservo.write(actual_angle);

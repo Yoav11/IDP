@@ -5,6 +5,7 @@
 #include <ultrasound_utils.h>
 #include <servo_utils.h>
 #include <Ticker.h>
+#include <polarity_detection_utils.h>
 
 int old_routine_step;
 bool stopped = true;
@@ -31,11 +32,12 @@ int robot_bearing;
 bool first_mine = true;
 int first_mine_step = 0;
 
-Ticker amber_led(blink_builtin, 500);
+Ticker amber_led(blink_builtin, 250);
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
     amber_led.start();
+    polatity_detection_setup();
     Serial.begin(9600);
     motor_begin();
     servo_setup();
@@ -45,14 +47,47 @@ void setup() {
     start_adjust_angle();
 }
 
+// void loop() {
+//   if (correct_way_up()) {
+//     lower_servo();
+//   } else {
+//     raise_servo();
+//   }
+// }
+
+// void loop() {
+//   stopped = stop_ticker();
+//   return_to_base(1.0, true, stopped);
+// }
+
+// void loop() {
+//   if (lower_servo()) {
+//     if (close_gripper(true)) {
+//       if (close_gripper(false)) {
+//         if (raise_servo()) {
+//
+//         }
+//       }
+//     }
+//   }
+// }
+
+// void loop() {
+//   if (lower_servo()) {
+//     if (raise_servo()) {
+//       return;
+//     }
+//   }
+// }
+
 
 void loop() {
 
-    // Serial.print("front");
+    // Serial.print("front: ");
     // test_distance_sensor(trigPinFront, echoPinFront, 2);
-    // Serial.print("back");
+    // Serial.print("back: ");
     // test_distance_sensor(trigPinBack, echoPinBack, 2);
-    // Serial.print("left");
+    // Serial.print("left: ");
     // test_distance_sensor(trigPinLeft, echoPinLeft, 2);
 
     amber_led.update();
@@ -144,9 +179,15 @@ void loop() {
             }
             break;
         case 9:
-            if (raise_servo()) {
+            if (correct_way_up()) {
+              move_servo(150);
               step++;
               start_move_to();
+            } else {
+              if (raise_servo()) {
+                step++;
+                start_move_to();
+              }
             }
             break;
         case 10:
@@ -154,14 +195,26 @@ void loop() {
             if(got_to_safe_zone) {
                 got_to_safe_zone = false;
                 step++;
-                start_move_to();
+                // start_move_to();
+                start_return();
             }
             break;
         case 11:
-            delay(1000);
-            step++;
+            if (raise_servo()) {
+              if (close_gripper(true)) {
+                Serial.println("closed");
+                step++;
+              }
+            }
             break;
         case 12:
+            if (close_gripper(false)) {
+              Serial.println("opened");
+              step++;
+              start_return();
+            }
+            break;
+        case 13:
             got_to_base = return_to_base(1.0, true, stopped);
             if(got_to_base) {
                 step = 1;
