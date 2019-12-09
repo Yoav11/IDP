@@ -1,6 +1,6 @@
 #include <ultrasound_utils.h>
 
-// Set up an ultrasound distance sensor
+// Set up the ultrasound distance sensors
 void ultrasound_setup() {
   pinMode(trigPinFront, OUTPUT);
   pinMode(echoPinFront, INPUT);

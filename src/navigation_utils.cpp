@@ -3,42 +3,39 @@
 #include <motor_utils.h>
 #include <ArduinoSort.h>
 
-int bearing = 90;
+int bearing = 90; // current bearing of the robot.
 
-bool move_forward_till_is_on = false;
-int move_forward_till_phase_counts[6] = {0, 0, 0, 0, 0, 0};
+bool move_forward_till_is_on = false; // move_forward_till only runs when this is true
+int move_forward_till_phase_counts[6] = {0, 0, 0, 0, 0, 0}; // Keeps track of how many times we have been in the same phase within move_forward_till
 
-int good_distance_count = 0;
-int good_distances[10];
-int return_base_step = 0;
-int final_base_turn = false;
+int good_distance_count = 0; // the number of good distances detected by the side sensor
+int good_distances[10]; // array for the good distances. (the median value is taken as the distance to the mine)
 
-int move_to_phase = 0;
-bool move_to_is_on = false;
-int get_to_mine_phase = 0;
-bool get_to_mine_is_on = false;
-bool get_to_mine_first_run = true;
-bool get_to_mine_go_back_up_first = true;
+int move_to_phase = 0; // keeps track of phase in move_to
+bool move_to_is_on = false; // move_to only runs when this is true
+int get_to_mine_phase = 0; // keeps track of phase in get_to_mine
+bool get_to_mine_is_on = false; // get_to_mine only runs when this is true
+bool get_to_mine_first_run = true; // this is true for the first run of get_to_mine (this makes the robot back up a little bit before turning)
 
-float current_time_mine = 0;
+float current_time_mine = 0; // timer used in get_to_mine
 
-bool adjusting_angle = false;
-bool adjusting_first_time = true;
-float adjust_start_time = 0;
+bool adjusting_angle = false; // adjust_angle only runs when this is true
+bool adjusting_first_time = true; // this is true for the first run of adjust_angle
+float adjust_start_time = 0; // timer used in adjust_angle
 
-bool first_base = false;
-int base_phase = 0;
+int base_phase = 0; // keeps track of phase in return_to_base
 
 // Returns whether the move_forward_till function should be in use.
 bool move_forward_till_on() {
   return move_forward_till_is_on;
 }
 
+// Returns the bearing
 int get_bearing() {
     return bearing;
 }
 
-// Set value for whether move_forward_till function should be in use.
+// Set value for whether move_forward_till function should be in use. This essentially starts the move_forward_till function.
 void set_move_forward_till(bool on) {
   move_forward_till_is_on = on;
   if (!on) {
@@ -46,23 +43,29 @@ void set_move_forward_till(bool on) {
   }
 }
 
+// Call this function once, before calling move_to in a loop
 void start_move_to() {
   move_to_is_on = true;
   move_to_phase = 0;
 }
+
+// This is called at the end of move_to
 void stop_move_to() {
   move_to_is_on = false;
   move_to_phase = 0;
 }
+
+// Call this function once, before get_to_mine in a loop
 void start_get_to_mine() {
   get_to_mine_is_on = true;
   get_to_mine_phase = 0;
 }
+
+// This is called at the end of get_to_mine
 void stop_get_to_mine() {
   get_to_mine_is_on = false;
   get_to_mine_phase = 0;
   get_to_mine_first_run = true;
-  get_to_mine_go_back_up_first = true;
 }
 
 // Converts the speed (-1 to 1) to the speed that can be read by the motors (0 to 255). Only the magnitude counts.
@@ -80,6 +83,7 @@ uint16_t motor_2_direction(float speed) {
   return (motor_1_direction(speed) == FORWARD) ? BACKWARD : FORWARD;
 }
 
+// This updates the counts for move_forward_till_phase_counts
 void set_counts_for_move_forward_till(int phase) {
   for (int i=0; i<6; i++) {
     if (i == phase) {
@@ -90,6 +94,7 @@ void set_counts_for_move_forward_till(int phase) {
   }
 }
 
+// This resets the counts for move_forward_till_phase_counts to 0
 void set_counts_for_move_forward_till_to_zero() {
   for (int i=0; i<6; i++) {
     move_forward_till_phase_counts[i] = 0;
@@ -99,8 +104,6 @@ void set_counts_for_move_forward_till_to_zero() {
 // Given speed (-1 to 1) and desired_d (desired distance in cm) from whichever sensor we're using to the object (whether using the front sensor or back sensor), this function determines whether it should move and how much power it should give to each motor.
 void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   if (!move_forward_till_on()) {return;}
-
-  // NEEDS CHANGE HERE WHEN WE START USING THE BACK SENSOR
   const int distance = get_distance(using_front_sensor ? trigPinFront : trigPinBack, using_front_sensor ? echoPinFront : echoPinBack);
   const float error = desired_d-distance;
   const uint16_t motor_1_direc = (using_front_sensor ? (distance > desired_d) : (distance < desired_d)) ? FORWARD : BACKWARD;
@@ -197,6 +200,7 @@ void move_forward_till(float desired_d, float speed, bool using_front_sensor) {
   }
 }
 
+// This keeps the robot moving forward
 void move_forward(float speed) {
   for (int i=1; i<3; i++) {
     motor_run(i, convert_to_speed_outOf_255(speed), (i==1) ? motor_1_direction(speed) : motor_2_direction(speed));
@@ -250,6 +254,7 @@ int detected_mine(int trigPinLeft, int echoPinLeft) {
   return -2;
 }
 
+// Call this in a loop to make the robot move to a specified coordinates. Returns true when the operation is done.
 bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_turning, int final_bearing) {
   if (!move_to_is_on) {return;}
   switch (move_to_phase) {
@@ -340,15 +345,18 @@ bool move_to(float x, float y, float speed, bool horizontal_first, bool stopped_
   return false;
 }
 
+// Call this in a loop to go to the safe zone. Returns true when the operation is done.
 bool go_to_safe_zone(float speed, bool horizontal_first, bool stopped_turning) {
   return move_to(30, 200, speed, horizontal_first, stopped_turning, 315);
 }
 
+// Call this once, before you start calling return_to_base
 void start_return() {
   start_move_to();
   base_phase = 0;
 }
 
+// Call this in a loop to return to the base. Returns true when the operation is done.
 bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
   switch (base_phase) {
     case 0:
@@ -377,6 +385,7 @@ bool return_to_base(float speed, bool horizontal_first, bool stopped_turning) {
   // return move_to(30, 25, speed, horizontal_first, stopped_turning, 90);
 }
 
+// returns the amount of time to back up before turning towards the mine depending on the detected distance.
 int back_up_duration(int detected_d) {
   if (detected_d < 10) {
     return 2000;
@@ -391,6 +400,7 @@ int back_up_duration(int detected_d) {
   }
 }
 
+// Call this in a loop to get to the mine detected. Returns true when the operation is done.
 bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   if (!get_to_mine_is_on) {return;}
   // int duration = 1500; // ms
@@ -456,16 +466,19 @@ bool get_to_mine(int distance_up_north, float speed, bool stopped_turning) {
   return false;
 }
 
+// call this once, before you start calling adjust_angle
 void start_adjust_angle() {
   adjusting_angle = true;
   adjusting_first_time = true;
 }
 
+// this is called at the end of adjust_angle
 void stop_adjust_angle() {
   adjusting_angle = false;
   motor_stop();
 }
 
+// Call this in a loop to adjust the angle of the robot. Returns true when the operation is done.
 bool adjust_angle(float speed) {
   if (!adjusting_angle) {return false;}
 

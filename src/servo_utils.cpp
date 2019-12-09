@@ -5,12 +5,13 @@ Servo myservo;
 float servo_timer;
 bool servo_first = true;
 
+// sets up the servo connection
 void servo_setup() {
   myservo.attach(servo_pin);
   move_servo(0);
 }
 
-// Moves the servo. angle is between and including 20 and 168
+// Moves the servo. angle is between and including 20 and 165
 // 20 is up, 168 is down
 void move_servo(int angle) {
   int actual_angle = angle;
@@ -31,6 +32,7 @@ void move_servo(int angle) {
   myservo.write(actual_angle);
 }
 
+// call this in a loop to raise servo. It returns true when it is complete
 bool raise_servo() {
   if (servo_first) {
     move_servo(0);
@@ -45,6 +47,7 @@ bool raise_servo() {
   return false;
 }
 
+// call this in a loop to lower servo. It returns true when it is complete
 bool lower_servo() {
   if (servo_first) {
     move_servo(180);
